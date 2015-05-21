@@ -1,0 +1,18 @@
+---
+en:
+  activerecord:
+    models:
+      worker_plugins/workplace_link:
+        one: Workplace link
+        other: Workplace links
+    attributes:
+      worker_plugins/workplace_link:
+        id: ID
+        workplace_id: Workplace ID
+        resource_id: Resource ID
+        resource_type: Resource type
+        custom_data: Custom data
+        created_at: Created at
+        updated_at: Updated at
+        workplace: Workplace
+        resource: Resource

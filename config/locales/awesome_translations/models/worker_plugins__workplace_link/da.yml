@@ -1,0 +1,18 @@
+---
+da:
+  activerecord:
+    models:
+      worker_plugins/workplace_link:
+        one: Arbejdspladslink
+        other: Arbejdspladslinks
+    attributes:
+      worker_plugins/workplace_link:
+        id: ID
+        workplace_id: Arbejdsplads ID
+        resource_id: Resource ID
+        resource_type: Resource type
+        custom_data: Selvvalgt data
+        created_at: Oprettet d.
+        updated_at: Opdateret d.
+        workplace: Arbejdsplads
+        resource: Resource

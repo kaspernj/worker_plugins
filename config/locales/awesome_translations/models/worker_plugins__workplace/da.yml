@@ -1,0 +1,16 @@
+---
+da:
+  activerecord:
+    models:
+      worker_plugins/workplace:
+        one: Arbejdsplads
+        other: Arbejdspladser
+    attributes:
+      worker_plugins/workplace:
+        id: ID
+        name: Navn
+        user_id: Bruger ID
+        created_at: Oprettet d.
+        updated_at: Opdateret d.
+        workplace_links: Arbejdsplads links
+        user: Bruger

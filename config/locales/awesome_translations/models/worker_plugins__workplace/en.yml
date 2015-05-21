@@ -1,0 +1,16 @@
+---
+en:
+  activerecord:
+    models:
+      worker_plugins/workplace:
+        one: Workplace
+        other: Workplaces
+    attributes:
+      worker_plugins/workplace:
+        id: ID
+        name: Name
+        user_id: User ID
+        created_at: Created at
+        updated_at: Updated at
+        workplace_links: Workplace links
+        user: User
