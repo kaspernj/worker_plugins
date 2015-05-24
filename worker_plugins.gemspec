@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'rails', '~> 3.2.21'
   # s.add_dependency "jquery-rails"
 
-  s.add_runtime_dependency 'cancancan'
   s.add_runtime_dependency 'active-record-transactioner'
 
   s.add_development_dependency 'sqlite3'

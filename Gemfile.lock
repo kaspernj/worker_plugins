@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    worker_plugins (0.0.1)
+    worker_plugins (0.0.2)
       active-record-transactioner
-      cancancan
       rails (~> 3.2.21)
 
 GEM
@@ -47,7 +46,6 @@ GEM
       sass-rails
       string-cases
     builder (3.0.4)
-    cancancan (1.10.1)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     factory_girl (4.5.0)
