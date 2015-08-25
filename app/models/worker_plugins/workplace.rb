@@ -82,7 +82,7 @@ private
   def load_inserted_ids
     inserted_ids = {}
 
-    workplace_links.select(worker_plugins_workplace_links: [:resource_type, :resource_id]).find_each do |workplace_link|
+    workplace_links.select("worker_plugins_workplace_links.resource_type, worker_plugins_workplace_links.resource_id").find_each do |workplace_link|
       inserted_ids[workplace_link.resource_type] ||= {}
       inserted_ids[workplace_link.resource_type][workplace_link.resource_id] = true
     end
