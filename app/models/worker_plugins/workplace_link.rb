@@ -1,6 +1,6 @@
-class WorkerPlugins::WorkplaceLink < ActiveRecord::Base
+class WorkerPlugins::WorkplaceLink < ApplicationRecord
   belongs_to :workplace
   belongs_to :resource, polymorphic: true
 
-  validates_presence_of :workplace, :resource
+  validates :workplace, :resource, presence: true
 end

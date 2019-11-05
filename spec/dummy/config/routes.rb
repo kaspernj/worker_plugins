@@ -1,5 +1,5 @@
 Dummy::Application.routes.draw do
-  mount AwesomeTranslations::Engine => '/awesome_translations' if Rails.env.development?
+  mount AwesomeTranslations::Engine => "/awesome_translations" if Rails.env.development?
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

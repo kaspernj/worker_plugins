@@ -8,6 +8,6 @@ class CreateWorkerPluginsWorkplaceLinks < ActiveRecord::Migration
     end
 
     add_index :worker_plugins_workplace_links, :workplace_id
-    add_index :worker_plugins_workplace_links, [:workplace_id, :resource_type, :resource_id], unique: true, name: 'unique_resource_on_workspace'
+    add_index :worker_plugins_workplace_links, [:workplace_id, :resource_type, :resource_id], unique: true, name: "unique_resource_on_workspace"
   end
 end
