@@ -7,6 +7,11 @@ Add to your Gemfile and bundle:
 gem 'worker_plugins'
 ```
 
+Install migrations:
+```bash
+rails worker_plugins:install:migrations
+```
+
 ## Usage
 
 Add a lot of objects to a workspace through transactions:
