@@ -1,19 +1,19 @@
-module WorkerPlugins
-  class Engine < ::Rails::Engine
-    isolate_namespace WorkerPlugins
+module WorkerPlugins; end
 
-    # Add translations to load path.
-    path = File.realpath(File.join(File.dirname(__FILE__), '..', '..', 'config', 'locales'))
-    I18n.load_path += Dir[File.join(path, '**', '*.{rb,yml}')]
+class WorkerPlugins::Engine < ::Rails::Engine
+  isolate_namespace WorkerPlugins
 
-    initializer :append_migrations do |app|
-      unless app.root.to_s.match root.to_s
-        if Rails.version.start_with?("3")
-          app.config.paths['db/migrate'] += config.paths['db/migrate'].expanded
-        else
-          config.paths['db/migrate'].expanded.each do |path|
-            app.config.paths['db/migrate'] << path
-          end
+  # Add translations to load path.
+  path = File.realpath(File.join(File.dirname(__FILE__), "..", "..", "config", "locales"))
+  I18n.load_path += Dir[File.join(path, "**", "*.{rb,yml}")]
+
+  initializer :append_migrations do |app|
+    unless app.root.to_s.match root.to_s
+      if Rails.version.start_with?("3")
+        app.config.paths["db/migrate"] += config.paths["db/migrate"].expanded
+      else
+        config.paths["db/migrate"].expanded.each do |another_path|
+          app.config.paths["db/migrate"] << another_path
         end
       end
     end

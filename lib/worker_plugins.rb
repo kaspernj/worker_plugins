@@ -1,4 +1,4 @@
-require 'worker_plugins/engine'
+require "worker_plugins/engine"
 
 module WorkerPlugins
 end

@@ -1,12 +1,12 @@
-class WorkerPlugins::Workplace < ActiveRecord::Base
+class WorkerPlugins::Workplace < ApplicationRecord
   has_many :workplace_links, dependent: :destroy
 
   belongs_to :user, polymorphic: true
 
-  validates_presence_of :name
+  validates :name, presence: true
 
   def add_links_to_objects(objects)
-    require 'active-record-transactioner'
+    require "active-record-transactioner"
 
     # Cache inserted objects.
     inserted_ids = load_inserted_ids
@@ -28,13 +28,13 @@ class WorkerPlugins::Workplace < ActiveRecord::Base
       end
     end
 
-    return
+    nil
   end
 
   def each_resource(args = {})
     count = 0
 
-    links_query = workplace_links.group('worker_plugins_workplace_links.resource_type').order('worker_plugins_workplace_links.id')
+    links_query = workplace_links.group("worker_plugins_workplace_links.resource_type").order("worker_plugins_workplace_links.id")
     links_query = links_query.where(resource_type: args[:types]) if args[:types]
 
     links_query.each do |workplace_link|
@@ -45,14 +45,14 @@ class WorkerPlugins::Workplace < ActiveRecord::Base
         constant.where(id: ids_slice).each do |resource|
           yield resource
           count += 1
-          return if args[:limit] && count >= args[:limit]
+          return if args[:limit] && count >= args[:limit] # rubocop:disable Lint/NonLocalExitFromIterator:
         end
       end
     end
   end
 
   def each_query_for_resources
-    workplace_links.group('worker_plugins_workplace_links.resource_type').order('worker_plugins_workplace_links.id').each do |workplace_link|
+    workplace_links.group("worker_plugins_workplace_links.resource_type").order("worker_plugins_workplace_links.id").each do |workplace_link|
       resource_type = workplace_link.resource_type
       constant = Object.const_get(resource_type)
       ids = workplace_links.select(:resource_id).where(resource_type: workplace_link.resource_type).map(&:resource_id)
@@ -87,6 +87,6 @@ private
       inserted_ids[workplace_link.resource_type][workplace_link.resource_id] = true
     end
 
-    return inserted_ids
+    inserted_ids
   end
 end
