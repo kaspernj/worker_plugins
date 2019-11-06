@@ -7,7 +7,7 @@ Add to your Gemfile and bundle:
 gem 'worker_plugins'
 ```
 
-Install migrations:
+Install migrations (only necessary sometimes - try running `rails db:migrate` first before installing migrations):
 ```bash
 rails worker_plugins:install:migrations
 ```
