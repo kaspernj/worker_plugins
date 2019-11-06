@@ -1,3 +1,4 @@
+# This migration comes from worker_plugins (originally 20150521114555)
 class CreateWorkerPluginsWorkplaces < ActiveRecord::Migration[5.2]
   def change
     create_table :worker_plugins_workplaces do |t|

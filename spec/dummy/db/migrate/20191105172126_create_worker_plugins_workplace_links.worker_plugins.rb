@@ -1,7 +1,8 @@
+# This migration comes from worker_plugins (originally 20150521114659)
 class CreateWorkerPluginsWorkplaceLinks < ActiveRecord::Migration[5.2]
   def change
     create_table :worker_plugins_workplace_links do |t|
-      t.references :workplace, index: {name: "index_on_workplace_id"}, foreign_key: {to_table: :worker_plugins_workplaces}, null: false
+      t.references :workplace, index: {name: "index_on_workplace_id"}, foreign_key: true, null: false
       t.belongs_to :resource, index: {name: "index_on_resource"}, null: false, polymorphic: true
 
       if postgres?
