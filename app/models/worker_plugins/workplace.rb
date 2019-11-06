@@ -1,4 +1,6 @@
 class WorkerPlugins::Workplace < ApplicationRecord
+  self.table_name = "worker_plugins_workplaces"
+
   has_many :workplace_links, dependent: :destroy
 
   belongs_to :user, polymorphic: true
