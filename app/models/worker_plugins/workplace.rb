@@ -1,4 +1,4 @@
-class WorkerPlugins::Workplace < ApplicationRecord
+class WorkerPlugins::Workplace < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
   self.table_name = "worker_plugins_workplaces"
 
   has_many :workplace_links, dependent: :destroy
@@ -33,22 +33,16 @@ class WorkerPlugins::Workplace < ApplicationRecord
     nil
   end
 
-  def each_resource(args = {})
+  def each_resource(limit: nil, types: nil)
     count = 0
 
-    links_query = workplace_links.group("worker_plugins_workplace_links.resource_type").order("worker_plugins_workplace_links.id")
-    links_query = links_query.where(resource_type: args[:types]) if args[:types]
-
-    links_query.each do |workplace_link|
-      constant = Object.const_get(workplace_link.resource_type)
-      ids = workplace_links.select(:resource_id).where(resource_type: workplace_link.resource_type).map(&:resource_id)
-
-      ids.each_slice(500) do |ids_slice|
-        constant.where(id: ids_slice).each do |resource|
-          yield resource
-          count += 1
-          return if args[:limit] && count >= args[:limit] # rubocop:disable Lint/NonLocalExitFromIterator:
-        end
+    links_query = workplace_links.order(:id)
+    links_query = links_query.where(resource_type: types) if types
+    links_query.find_in_batches do |workplace_links|
+      workplace_links.each do |workplace_link|
+        yield workplace_link.resource
+        count += 1
+        return if limit && count >= limit # rubocop:disable Lint/NonLocalExitFromIterator:
       end
     end
   end
