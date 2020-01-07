@@ -5,4 +5,5 @@ class WorkerPlugins::WorkplaceLink < ActiveRecord::Base # rubocop:disable Rails/
   belongs_to :resource, polymorphic: true
 
   validates :workplace, :resource, presence: true
+  validates :resource_id, uniqueness: {scope: [:resource_type, :workplace_id]}
 end
