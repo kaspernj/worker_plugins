@@ -17,7 +17,7 @@ describe WorkerPlugins::AddCollection do
       expect { result }
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
-      expect(result.fetch(:created)).to eq("Task" => [task1.id, task2.id])
+      expect(result.fetch(:created)).to eq [task1.id, task2.id]
     end
   end
 
