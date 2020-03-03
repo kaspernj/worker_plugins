@@ -7,32 +7,6 @@ class WorkerPlugins::Workplace < ActiveRecord::Base # rubocop:disable Rails/Appl
 
   validates :name, presence: true
 
-  def add_links_to_objects(objects)
-    require "active-record-transactioner"
-
-    # Cache inserted objects.
-    inserted_ids = load_inserted_ids
-
-    # Add given objects through transactions.
-    ActiveRecordTransactioner.new do |trans|
-      stream_each(objects) do |object|
-        class_name = object.class.name.to_s
-        inserted_ids[class_name] ||= {}
-
-        unless inserted_ids[class_name].key?(object.id)
-          inserted_ids[class_name][object.id] = true
-          link = WorkerPlugins::WorkplaceLink.new(
-            workplace: self,
-            resource: object
-          )
-          trans.save!(link)
-        end
-      end
-    end
-
-    nil
-  end
-
   def each_resource(limit: nil, types: nil)
     count = 0
 

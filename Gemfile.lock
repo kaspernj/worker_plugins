@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     worker_plugins (0.0.3)
-      active-record-transactioner (>= 0.0.7)
       rails (>= 5.0.0)
       service_pattern (>= 0.0.6)
 
