@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "awesome_translations"
   s.add_development_dependency "factory_bot_rails"
+  s.add_development_dependency "pry-rails"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "rubocop"
   s.add_development_dependency "rubocop-performance"

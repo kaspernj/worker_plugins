@@ -99,6 +99,7 @@ GEM
       simple_delegate
       string-cases
     builder (3.2.4)
+    coderay (1.1.2)
     concurrent-ruby (1.1.5)
     crass (1.0.6)
     datet (0.0.25)
@@ -140,6 +141,11 @@ GEM
     parallel (1.19.1)
     parser (2.7.0.3)
       ast (~> 2.4.0)
+    pry (0.12.2)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    pry-rails (0.3.9)
+      pry (>= 0.10.4)
     rack (2.1.2)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -245,6 +251,7 @@ DEPENDENCIES
   awesome_translations
   factory_bot_rails
   jquery-rails
+  pry-rails
   rspec-rails
   rubocop
   rubocop-performance
