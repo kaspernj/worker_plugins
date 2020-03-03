@@ -18,10 +18,12 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", ">= 5.0.0"
   # s.add_dependency "jquery-rails"
 
-  s.add_runtime_dependency "active-record-transactioner"
+  s.add_runtime_dependency "active-record-transactioner", ">= 0.0.7"
+  s.add_runtime_dependency "service_pattern", ">= 0.0.6"
 
   s.add_development_dependency "awesome_translations"
   s.add_development_dependency "factory_bot_rails"
+  s.add_development_dependency "pry-rails"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "rubocop"
   s.add_development_dependency "rubocop-performance"
