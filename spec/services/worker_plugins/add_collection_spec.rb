@@ -19,6 +19,16 @@ describe WorkerPlugins::AddCollection do
 
       expect(result.fetch(:created)).to eq [task1.id, task2.id]
     end
+
+    it "doesnt add the same resource multiple times" do
+      task1 = create :task, user: user
+      task2 = create :task, user: user
+      query = User.joins(:tasks).where(id: [task1.id, task2.id])
+
+      expect(query).to eq [user, user]
+      expect { WorkerPlugins::AddCollection.execute!(query: query, workplace: workplace) }
+        .to change(workplace.workplace_links, :count).by(1)
+    end
   end
 
   describe "#ids_added_already" do
