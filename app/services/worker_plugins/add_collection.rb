@@ -36,17 +36,17 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
   end
 
   def resources_to_add
-    @resources_to_add ||= query.where.not(id: ids_added_already)
+    @resources_to_add ||= query.distinct.where.not(id: ids_added_already)
   end
 
   def select_sql
     @select_sql ||= resources_to_add
       .select("
         #{db_now_method},
-        '#{resources_to_add.klass.name}',
+        #{WorkerPlugins::Workplace.connection.quote(resources_to_add.klass.name)},
         \"#{resources_to_add.klass.table_name}\".\"#{primary_key}\",
         #{db_now_method},
-        '#{workplace.id}'
+        #{WorkerPlugins::Workplace.connection.quote(workplace.id)}
       ")
       .to_sql
   end
