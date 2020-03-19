@@ -2,6 +2,7 @@ before_install:
   - gem install bundler -v 2.1.2
 before_script:
   - bundle exec rails db:migrate
+rvm: true
 script:
   - bundle exec rspec
   - bundle exec rubocop
