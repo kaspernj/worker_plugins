@@ -3,6 +3,7 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
 
   def initialize(query:, workplace:)
     @query = query
+      .except(:order) # This fixes crashes in Postgres
     @workplace = workplace
   end
 
@@ -36,7 +37,10 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
   end
 
   def resources_to_add
-    @resources_to_add ||= query.distinct.where.not(id: ids_added_already)
+    @resources_to_add ||= query
+      .distinct
+      .where
+      .not(id: ids_added_already)
   end
 
   def select_sql
@@ -52,21 +56,19 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
   end
 
   def sql
-    @sql ||= begin
-      "
-        INSERT INTO
-          worker_plugins_workplace_links
+    @sql ||= "
+      INSERT INTO
+        worker_plugins_workplace_links
 
-        (
-          created_at,
-          resource_type,
-          resource_id,
-          updated_at,
-          workplace_id
-        )
+      (
+        created_at,
+        resource_type,
+        resource_id,
+        updated_at,
+        workplace_id
+      )
 
-        #{select_sql}
-      "
-    end
+      #{select_sql}
+    "
   end
 end

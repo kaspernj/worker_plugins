@@ -40,4 +40,16 @@ describe WorkerPlugins::AddCollection do
       expect(task_ids).to eq [task1.id]
     end
   end
+
+  describe "#resources_to_add" do
+    it "removes the order to fix crashes in postgres" do
+      task1 = create :task, user: user
+      task2 = create :task, user: user
+      query = User.joins(:tasks).where(id: [task1.id, task2.id]).order(:name)
+      service = WorkerPlugins::AddCollection.new(query: query, workplace: workplace)
+      sql = service.resources_to_add.to_sql
+
+      expect(sql).not_to include "ORDER BY"
+    end
+  end
 end
