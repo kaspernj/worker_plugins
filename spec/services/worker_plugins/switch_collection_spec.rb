@@ -29,7 +29,7 @@ describe WorkerPlugins::SwitchCollection do
 
       expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
       expect(result.fetch(:mode)).to eq :destroyed
-      expect(result.fetch(:destroyed)).to eq [task1.id]
+      expect(result.fetch(:destroyed)).to eq [task1.id.to_s]
     end
   end
 end
