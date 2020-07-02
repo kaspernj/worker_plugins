@@ -17,7 +17,7 @@ describe WorkerPlugins::RemoveCollection do
         .to change(WorkerPlugins::WorkplaceLink, :count).by(-1)
 
       expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
-      expect(result.fetch(:destroyed)).to eq [task1.id]
+      expect(result.fetch(:destroyed)).to eq [task1.id.to_s]
     end
   end
 end
