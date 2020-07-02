@@ -37,7 +37,7 @@ describe WorkerPlugins::AddCollection do
       create(:workplace_link, resource: task2)
 
       task_ids = service.ids_added_already.pluck(:resource_id)
-      expect(task_ids).to eq [task1.id]
+      expect(task_ids).to eq [task1.id.to_s]
     end
   end
 
