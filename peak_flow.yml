@@ -5,4 +5,4 @@ before_script:
 rvm: true
 script:
   - bundle exec rspec
-  - bundle exec rubocop
+  - bundle exec rubocop --enable-pending-cops

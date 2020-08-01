@@ -24,11 +24,17 @@ Layout/CaseIndentation:
 Layout/EmptyLines:
   Enabled: false
 
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: true
+
 Layout/EmptyLinesAroundArguments:
   Enabled: false
 
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
+
+Layout/LineLength:
+  Max: 160
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
@@ -42,8 +48,26 @@ Layout/ParameterAlignment:
 Layout/RescueEnsureAlignment:
   Enabled: false
 
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
+
+Lint/DeprecatedOpenSSLConstant:
+  Enabled: true
+
+Lint/DuplicateElsifCondition:
+  Enabled: true
+
+Lint/MixedRegexpCaptureTypes:
+  Enabled: true
+
+Lint/RaiseException:
+  Enabled: true
+
+Lint/StructNewOverride:
+  Enabled: true
 
 Metrics/AbcSize:
   Max: 25
@@ -56,9 +80,6 @@ Metrics/ClassLength:
 
 Metrics/CyclomaticComplexity:
   Max: 10
-
-Metrics/LineLength:
-  Max: 160
 
 Metrics/MethodLength:
   Max: 50
@@ -104,14 +125,32 @@ RSpec/NestedGroups:
 RSpec/PredicateMatcher:
   Enabled: false
 
+Style/AccessorGrouping:
+  Enabled: true
+
+Style/ArrayCoercion:
+  Enabled: true
+
+Style/BisectedAttrAccessor:
+  Enabled: true
+
+Style/CaseLikeIf:
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   EnforcedStyle: compact
 
 Style/ConditionalAssignment:
   Enabled: false
 
+Style/ExponentialNotation:
+  Enabled: true
+
 Style/Documentation:
   Enabled: false
+
+Style/HashAsLastArrayItem:
+  Enabled: true
 
 Style/HashEachMethods:
   Enabled: true
