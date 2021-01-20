@@ -15,7 +15,9 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
     elsif column_to_compare_with.type == :integer
       succeed! query_with_integer
     else
-      raise "Unknown type: #{column_to_compare_with.type}"
+      raise "Cant handle type cast between types: " \
+        "#{model_class.table_name}.#{column_name_to_select} (#{column_to_select.type}) " \
+        "#{column_to_compare_with.name} (#{column_to_compare_with.type})"
     end
   end
 
