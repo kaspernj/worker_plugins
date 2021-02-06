@@ -61,10 +61,10 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
   def select_sql
     @select_sql ||= resources_to_add
       .select("
-        #{db_now_method},
-        #{WorkerPlugins::Workplace.connection.quote(resources_to_add.klass.name)},
+        #{db_now_value},
+        #{quote(resources_to_add.klass.name)},
         \"#{resources_to_add.klass.table_name}\".\"#{primary_key}\",
-        #{db_now_method},
+        #{db_now_value},
         #{select_workplace_id_sql}
       ")
       .to_sql
@@ -74,9 +74,9 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
     workplace_id_column = WorkerPlugins::WorkplaceLink.columns.find { |column| column.name == "workplace_id" }
 
     if workplace_id_column.type == :uuid
-      "CAST(#{WorkerPlugins::Workplace.connection.quote(workplace.id)} AS UUID)"
+      "CAST(#{quote(workplace.id)} AS UUID)"
     else
-      WorkerPlugins::Workplace.connection.quote(workplace.id)
+      quote(workplace.id)
     end
   end
 
