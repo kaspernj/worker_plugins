@@ -7,7 +7,7 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
     @workplace = workplace
   end
 
-  def execute
+  def perform
     created # Cache which are about to be created
     add_query_to_workplace
     succeed!(created: created)
