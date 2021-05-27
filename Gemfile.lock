@@ -3,7 +3,7 @@ PATH
   specs:
     worker_plugins (0.0.3)
       rails (>= 5.0.0)
-      service_pattern (>= 0.0.6)
+      service_pattern (>= 1.0.0)
 
 GEM
   remote: https://rubygems.org/
