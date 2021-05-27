@@ -6,7 +6,7 @@ class WorkerPlugins::RemoveCollection < WorkerPlugins::ApplicationService
     @workplace = workplace
   end
 
-  def execute
+  def perform
     remove_query_from_workplace
     succeed!(destroyed: destroyed, mode: :destroyed)
   end

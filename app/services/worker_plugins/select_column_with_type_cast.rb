@@ -7,7 +7,7 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
     @query = query
   end
 
-  def execute
+  def perform
     return succeed! query.select(column_name_to_select) if same_type?
 
     if column_to_compare_with.type == :string

@@ -6,7 +6,7 @@ class WorkerPlugins::SwitchCollection < WorkerPlugins::ApplicationService
     @workplace = workplace
   end
 
-  def execute
+  def perform
     if resources_to_add.count.zero?
       result = WorkerPlugins::RemoveCollection.execute!(query: query, workplace: workplace)
       succeed!(
