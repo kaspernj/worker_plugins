@@ -12,11 +12,11 @@ Gem::Specification.new do |s|
   s.homepage = "https://www.github.com/kaspernj/worker_plugins"
   s.summary = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
   s.description = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
-  s.required_ruby_version = ">= 2.5.7"
+  s.required_ruby_version = ">= 2.7.5"
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
 
-  s.add_dependency "rails", ">= 5.0.0"
+  s.add_dependency "rails", ">= 6.0.0"
 
   s.add_runtime_dependency "service_pattern", ">= 1.0.0"
 
