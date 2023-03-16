@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.summary = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
   s.description = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
   s.required_ruby_version = ">= 2.7.5"
+  s.metadata["rubygems_mfa_required"] = "true"
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
 

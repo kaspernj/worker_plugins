@@ -1,6 +1,6 @@
 module WorkerPlugins; end
 
-class WorkerPlugins::Engine < ::Rails::Engine
+class WorkerPlugins::Engine < Rails::Engine
   isolate_namespace WorkerPlugins
 
   # Add translations to load path.
