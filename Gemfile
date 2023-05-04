@@ -5,13 +5,18 @@ source "https://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
-# jquery-rails is used by the dummy application
-gem "jquery-rails"
+gem "rails", ">= 6.0.0"
+gem "service_pattern", ">= 1.0.0"
 
-# Declare any dependencies that are still in development here instead of in
-# your gemspec. These might include edge Rails or gems from your path or
-# Git. Remember to move these dependencies to your gemspec before releasing
-# your gem to rubygems.org.
-
-# To use debugger
-# gem 'debugger'
+group :development do
+  gem "awesome_translations"
+  gem "factory_bot_rails"
+  gem "jquery-rails"
+  gem "pry-rails"
+  gem "rspec-rails"
+  gem "rubocop"
+  gem "rubocop-performance"
+  gem "rubocop-rails"
+  gem "rubocop-rspec"
+  gem "sqlite3"
+end
