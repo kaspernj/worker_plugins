@@ -269,7 +269,7 @@ DEPENDENCIES
   rubocop-performance
   rubocop-rails
   rubocop-rspec
-  service_pattern (>= 1.0.0)
+  service_pattern (>= 1.0.10)
   sqlite3
   worker_plugins!
 

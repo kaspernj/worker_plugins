@@ -6,7 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rails", ">= 6.0.0"
-gem "service_pattern", ">= 1.0.0"
+gem "service_pattern", ">= 1.0.10"
 
 group :development do
   gem "awesome_translations"
