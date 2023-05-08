@@ -15,6 +15,14 @@ class WorkerPlugins::ApplicationService < ServicePattern::Service
     WorkerPlugins::Workplace.connection.quote(value)
   end
 
+  def quote_column(value)
+    WorkerPlugins::Workplace.connection.quote_column_name(value)
+  end
+
+  def quote_table(value)
+    WorkerPlugins::Workplace.connection.quote_table_name(value)
+  end
+
   def postgres?
     ActiveRecord::Base.connection.instance_values["config"][:adapter].downcase.include?("postgres")
   end
