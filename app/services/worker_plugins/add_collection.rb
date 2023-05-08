@@ -63,7 +63,7 @@ class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
       .select("
         #{db_now_value},
         #{quote(resources_to_add.klass.name)},
-        \"#{resources_to_add.klass.table_name}\".\"#{primary_key}\",
+        #{quote_table(resources_to_add.klass.table_name)}.#{quote_column(primary_key)},
         #{db_now_value},
         #{select_workplace_id_sql}
       ")
