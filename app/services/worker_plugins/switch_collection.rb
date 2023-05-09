@@ -1,20 +1,15 @@
 class WorkerPlugins::SwitchCollection < WorkerPlugins::ApplicationService
-  attr_reader :query, :workplace
-
-  def initialize(query:, workplace:)
-    @query = query
-    @workplace = workplace
-  end
+  arguments :query, :workplace
 
   def perform
     if resources_to_add.count.zero?
-      result = WorkerPlugins::RemoveCollection.execute!(query: query, workplace: workplace)
+      result = WorkerPlugins::RemoveQuery.execute!(query: query, workplace: workplace)
       succeed!(
         destroyed: result.fetch(:destroyed),
         mode: :destroyed
       )
     else
-      result = WorkerPlugins::AddCollection.execute!(query: query, workplace: workplace)
+      result = WorkerPlugins::AddQuery.execute!(query: query, workplace: workplace)
       succeed!(
         created: result.fetch(:created),
         mode: :created

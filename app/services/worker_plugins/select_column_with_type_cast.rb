@@ -1,11 +1,5 @@
 class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationService
-  attr_reader :column_name_to_select, :column_to_compare_with, :query
-
-  def initialize(column_name_to_select:, column_to_compare_with:, query:)
-    @column_name_to_select = column_name_to_select
-    @column_to_compare_with = column_to_compare_with
-    @query = query
-  end
+  arguments :column_name_to_select, :column_to_compare_with, :query
 
   def perform
     return succeed! query.select(column_name_to_select) if same_type?

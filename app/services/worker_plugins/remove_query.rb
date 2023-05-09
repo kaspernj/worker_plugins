@@ -1,10 +1,7 @@
-class WorkerPlugins::RemoveCollection < WorkerPlugins::ApplicationService
-  attr_reader :destroyed, :query, :workplace
+class WorkerPlugins::RemoveQuery < WorkerPlugins::ApplicationService
+  arguments :query, :workplace
 
-  def initialize(query:, workplace:)
-    @query = query
-    @workplace = workplace
-  end
+  attr_reader :destroyed
 
   def perform
     remove_query_from_workplace
@@ -25,7 +22,7 @@ class WorkerPlugins::RemoveCollection < WorkerPlugins::ApplicationService
     WorkerPlugins::SelectColumnWithTypeCast.execute!(
       column_name_to_select: :id,
       column_to_compare_with: WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id),
-      query: query
+      query: query.except(:order)
     )
   end
 end
