@@ -13,4 +13,4 @@ RSpec/IndexedLet:
     - 'spec/models/worker_plugins/workplace_spec.rb'
     - 'spec/services/worker_plugins/add_query_spec.rb'
     - 'spec/services/worker_plugins/remove_query_spec.rb'
-    - 'spec/services/worker_plugins/switch_collection_spec.rb'
+    - 'spec/services/worker_plugins/switch_query_spec.rb'

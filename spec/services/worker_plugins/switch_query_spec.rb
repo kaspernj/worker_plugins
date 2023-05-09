@@ -1,11 +1,11 @@
 require "rails_helper"
 
-describe WorkerPlugins::SwitchCollection do
+describe WorkerPlugins::SwitchQuery do
   let(:task1) { create :task }
   let(:task2) { create :task }
   let(:link1) { create :workplace_link, resource: task1, workplace: workplace }
-  let(:result) { WorkerPlugins::SwitchCollection.execute!(query: Task.all, workplace: workplace) }
-  let(:service) { WorkerPlugins::SwitchCollection.new(query: Task.all, workplace: workplace) }
+  let(:result) { WorkerPlugins::SwitchQuery.execute!(query: Task.all, workplace: workplace) }
+  let(:service) { WorkerPlugins::SwitchQuery.new(query: Task.all, workplace: workplace) }
   let(:user) { create :user }
   let(:workplace) { create :workplace, user: user }
 

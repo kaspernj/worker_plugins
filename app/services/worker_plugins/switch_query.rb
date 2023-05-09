@@ -1,4 +1,4 @@
-class WorkerPlugins::SwitchCollection < WorkerPlugins::ApplicationService
+class WorkerPlugins::SwitchQuery < WorkerPlugins::ApplicationService
   arguments :query, :workplace
 
   def perform
