@@ -1,4 +1,4 @@
-class WorkerPlugins::AddCollection < WorkerPlugins::ApplicationService
+class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   attr_reader :query, :workplace
 
   def initialize(query:, workplace:)

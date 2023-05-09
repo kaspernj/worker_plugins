@@ -1,11 +1,11 @@
 require "rails_helper"
 
-describe WorkerPlugins::AddCollection do
+describe WorkerPlugins::AddQuery do
   let(:task1) { create :task }
   let(:task2) { create :task }
   let(:link1) { create :workplace_link, resource: task1, workplace: workplace }
-  let(:result) { WorkerPlugins::AddCollection.execute!(query: Task.all, workplace: workplace) }
-  let(:service) { WorkerPlugins::AddCollection.new(query: Task.all, workplace: workplace) }
+  let(:result) { WorkerPlugins::AddQuery.execute!(query: Task.all, workplace: workplace) }
+  let(:service) { WorkerPlugins::AddQuery.new(query: Task.all, workplace: workplace) }
   let(:user) { create :user }
   let(:workplace) { create :workplace, user: user }
 
@@ -26,7 +26,7 @@ describe WorkerPlugins::AddCollection do
       query = User.joins(:tasks).where(id: [task1.id, task2.id])
 
       expect(query).to eq [user, user]
-      expect { WorkerPlugins::AddCollection.execute!(query: query, workplace: workplace) }
+      expect { WorkerPlugins::AddQuery.execute!(query: query, workplace: workplace) }
         .to change(workplace.workplace_links, :count).by(1)
     end
   end
@@ -46,7 +46,7 @@ describe WorkerPlugins::AddCollection do
       task1 = create :task, user: user
       task2 = create :task, user: user
       query = User.joins(:tasks).where(id: [task1.id, task2.id]).order(:name)
-      service = WorkerPlugins::AddCollection.new(query: query, workplace: workplace)
+      service = WorkerPlugins::AddQuery.new(query: query, workplace: workplace)
       sql = service.resources_to_add.to_sql
 
       expect(sql).not_to include "ORDER BY"
