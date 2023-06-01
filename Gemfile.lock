@@ -269,6 +269,7 @@ DEPENDENCIES
   rails (>= 6.0.0)
   rspec-rails
   rubocop
+  rubocop-factory_bot
   rubocop-performance
   rubocop-rails
   rubocop-rspec

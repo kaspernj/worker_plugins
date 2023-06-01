@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :workplace_link, class: "WorkerPlugins::WorkplaceLink" do
-    association :resource, factory: :task
+    resource factory: %i[task]
     workplace
   end
 end
