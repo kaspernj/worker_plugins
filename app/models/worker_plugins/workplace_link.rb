@@ -1,4 +1,4 @@
-class WorkerPlugins::WorkplaceLink < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
+class WorkerPlugins::WorkplaceLink < WorkerPlugins::ApplicationRecord # rubocop:disable Rails/ApplicationRecord
   self.table_name = "worker_plugins_workplace_links"
 
   belongs_to :workplace
