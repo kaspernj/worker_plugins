@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://www.github.com/kaspernj/worker_plugins"
   s.summary = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
   s.description = "Rails framework for easily choosing and creating lists of objects and execute plugins against them."
-  s.required_ruby_version = ">= 2.7.5"
+  s.required_ruby_version = ">= 2.7.8"
   s.metadata["rubygems_mfa_required"] = "true"
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
