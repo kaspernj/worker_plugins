@@ -3,7 +3,7 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
 
   has_many :workplace_links, dependent: :destroy
 
-  belongs_to :user, polymorphic: true
+  belongs_to :user, polymorphic: WorkerPlugins::UserRelationshipPolymorphic.execute!
 
   validates :name, presence: true
 
