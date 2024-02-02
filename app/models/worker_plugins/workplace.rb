@@ -30,7 +30,7 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
       ids.each_slice(500) do |ids_slice|
         query = constant.where(id: ids_slice)
 
-        yield(query: query, resource_type: resource_type)
+        yield(query:, resource_type:)
       end
     end
   end
@@ -41,11 +41,11 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
 
 private
 
-  def stream_each(list, &blk)
+  def stream_each(list, &)
     if list.respond_to?(:find_each)
-      list.find_each(&blk)
+      list.find_each(&)
     else
-      list.each(&blk)
+      list.each(&)
     end
   end
 

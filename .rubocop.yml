@@ -9,6 +9,7 @@ AllCops:
     - node_modules/**/*
     - spec/dummy/db/schema.rb
   NewCops: enable
+  TargetRubyVersion: 3.2
 
 require:
   - rubocop-factory_bot

@@ -3,13 +3,13 @@ class WorkerPlugins::SwitchQuery < WorkerPlugins::ApplicationService
 
   def perform
     if resources_to_add.count.zero?
-      result = WorkerPlugins::RemoveQuery.execute!(query: query, workplace: workplace)
+      result = WorkerPlugins::RemoveQuery.execute!(query:, workplace:)
       succeed!(
         destroyed: result.fetch(:destroyed),
         mode: :destroyed
       )
     else
-      result = WorkerPlugins::AddQuery.execute!(query: query, workplace: workplace)
+      result = WorkerPlugins::AddQuery.execute!(query:, workplace:)
       succeed!(
         created: result.fetch(:created),
         mode: :created
@@ -39,7 +39,7 @@ class WorkerPlugins::SwitchQuery < WorkerPlugins::ApplicationService
     WorkerPlugins::SelectColumnWithTypeCast.execute!(
       column_name_to_select: :id,
       column_to_compare_with: WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id),
-      query: query
+      query:
     )
   end
 

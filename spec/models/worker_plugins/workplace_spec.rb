@@ -1,12 +1,12 @@
 require "rails_helper"
 
 describe WorkerPlugins::Workplace do
-  let(:link_task1) { create :workplace_link, resource: task1, workplace: workplace }
-  let(:link_task2) { create :workplace_link, resource: task2, workplace: workplace }
+  let(:link_task1) { create :workplace_link, resource: task1, workplace: }
+  let(:link_task2) { create :workplace_link, resource: task2, workplace: }
   let!(:task1) { create :task }
   let!(:task2) { create :task }
   let(:user) { create :user }
-  let(:workplace) { create :workplace, user: user }
+  let(:workplace) { create :workplace, user: }
 
   describe "#each_resource" do
     it "streams resources of the given type" do
