@@ -11,8 +11,8 @@ class WorkerPlugins::QueryLinksStatus < WorkerPlugins::ApplicationService
 
     succeed!(
       all_checked: query_count == checked_count,
-      checked_count: checked_count,
-      query_count: query_count,
+      checked_count:,
+      query_count:,
       some_checked: checked_count.positive? && checked_count < query_count
     )
   end

@@ -10,7 +10,7 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   def perform
     created # Cache which are about to be created
     add_query_to_workplace
-    succeed!(created: created)
+    succeed!(created:)
   end
 
   def add_query_to_workplace
@@ -47,7 +47,7 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
     WorkerPlugins::SelectColumnWithTypeCast.execute!(
       column_name_to_select: :id,
       column_to_compare_with: WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id),
-      query: query
+      query:
     )
   end
 
