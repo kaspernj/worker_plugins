@@ -85,7 +85,7 @@ GEM
     ast (2.4.2)
     auto_autoloader (0.0.5)
       string-cases
-    awesome_translations (0.0.63)
+    awesome_translations (0.0.65)
       active-record-transactioner (>= 0.0.7)
       array_enumerator (>= 0.0.10)
       auto_autoloader (>= 0.0.4)
@@ -227,6 +227,7 @@ GEM
     rake (13.1.0)
     rdoc (6.6.2)
       psych (>= 4.0.0)
+    ref (2.0.0)
     regexp_parser (2.9.0)
     reline (0.4.3)
       io-console (~> 0.5)
@@ -289,11 +290,14 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    weakling (0.0.3)
     webrick (1.8.1)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    wref (0.0.8)
+    wref (0.0.9)
+      ref
+      weakling
     zeitwerk (2.6.13)
 
 PLATFORMS
