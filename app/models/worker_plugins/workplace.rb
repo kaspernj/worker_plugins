@@ -16,7 +16,7 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
       workplace_links.each do |workplace_link|
         yield workplace_link.resource
         count += 1
-        return if limit && count >= limit # rubocop:disable Lint/NonLocalExitFromIterator:
+        return if limit && count >= limit # rubocop:disable Lint/NonLocalExitFromIterator
       end
     end
   end
