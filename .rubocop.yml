@@ -11,8 +11,10 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
 
-require:
+plugins:
   - rubocop-factory_bot
+
+require:
   - rubocop-performance
   - rubocop-rails
   - rubocop-rspec
