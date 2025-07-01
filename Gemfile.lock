@@ -159,7 +159,7 @@ GEM
     marcel (1.0.4)
     method_source (1.1.0)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.8)
+    mini_portile2 (2.8.9)
     minitest (5.25.5)
     net-imap (0.5.7)
       date
@@ -287,7 +287,7 @@ GEM
     securerandom (0.4.1)
     service_pattern (1.0.10)
     simple_delegate (0.0.4)
-    sqlite3 (2.6.0)
+    sqlite3 (2.7.1)
       mini_portile2 (~> 2.8.0)
     string-cases (0.0.4)
     stringio (3.1.7)
