@@ -2,7 +2,7 @@ class WorkerPlugins::SwitchQuery < WorkerPlugins::ApplicationService
   arguments :query, :workplace
 
   def perform
-    if resources_to_add.count.zero?
+    if resources_to_add.none?
       result = WorkerPlugins::RemoveQuery.execute!(query:, workplace:)
       succeed!(
         destroyed: result.fetch(:destroyed),
