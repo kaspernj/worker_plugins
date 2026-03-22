@@ -10,42 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_07_082836) do
-
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_194625) do
   create_table "tasks", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "name", null: false
+    t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_tasks_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "email", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "worker_plugins_workplace_links", force: :cascade do |t|
-    t.integer "workplace_id", null: false
-    t.string "resource_type", null: false
-    t.string "resource_id", null: false
-    t.json "custom_data"
     t.datetime "created_at", null: false
+    t.json "custom_data"
+    t.string "resource_id", null: false
+    t.string "resource_type", null: false
     t.datetime "updated_at", null: false
+    t.integer "workplace_id", null: false
     t.index ["resource_type", "resource_id"], name: "index_on_resource"
     t.index ["workplace_id", "resource_type", "resource_id"], name: "unique_resource_on_workspace", unique: true
     t.index ["workplace_id"], name: "index_on_workplace_id"
   end
 
   create_table "worker_plugins_workplaces", force: :cascade do |t|
-    t.string "name", null: false
     t.boolean "active", default: false, null: false
-    t.string "user_type"
-    t.integer "user_id"
     t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "session_id"
     t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.string "user_type"
     t.index ["active"], name: "index_worker_plugins_workplaces_on_active"
+    t.index ["session_id"], name: "index_worker_plugins_workplaces_on_session_id", unique: true
     t.index ["user_type", "user_id"], name: "index_worker_plugins_workplaces_on_user"
   end
 
