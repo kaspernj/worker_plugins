@@ -30,11 +30,7 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
   end
 
   def query_with_uuid
-    if postgres?
-      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS UUID)")
-    else
-      query_with_varchar
-    end
+    query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS UUID)")
   end
 
   def same_type?
