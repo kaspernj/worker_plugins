@@ -32,6 +32,8 @@ class WorkerPlugins::ApplicationService < ServicePattern::Service
   end
 
   def mysql?
-    ActiveRecord::Base.connection.instance_values["config"][:adapter].downcase.include?("mysql")
+    adapter_name = ActiveRecord::Base.connection.instance_values["config"][:adapter].downcase
+
+    adapter_name.include?("mysql") || adapter_name.include?("trilogy")
   end
 end
