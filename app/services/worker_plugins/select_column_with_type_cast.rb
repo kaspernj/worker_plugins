@@ -6,6 +6,8 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
 
     if column_to_compare_with.type == :integer
       succeed! query_with_integer
+    elsif column_to_compare_with.type == :uuid
+      succeed! query_with_uuid
     else
       succeed! query_with_varchar
     end
@@ -25,6 +27,10 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
 
   def query_with_varchar
     query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS VARCHAR)")
+  end
+
+  def query_with_uuid
+    query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS UUID)")
   end
 
   def same_type?
