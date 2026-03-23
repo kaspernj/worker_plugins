@@ -22,15 +22,27 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
   end
 
   def query_with_integer
-    query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS BIGINT)")
+    if mysql?
+      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS SIGNED)")
+    else
+      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS BIGINT)")
+    end
   end
 
   def query_with_varchar
-    query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS VARCHAR)")
+    if mysql?
+      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS CHAR)")
+    else
+      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS VARCHAR)")
+    end
   end
 
   def query_with_uuid
-    query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS UUID)")
+    if postgres?
+      query.select("CAST(#{model_class.table_name}.#{column_name_to_select} AS UUID)")
+    else
+      query_with_varchar
+    end
   end
 
   def same_type?
