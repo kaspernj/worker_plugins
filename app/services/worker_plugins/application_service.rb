@@ -30,4 +30,8 @@ class WorkerPlugins::ApplicationService < ServicePattern::Service
   def sqlite?
     ActiveRecord::Base.connection.instance_values["config"][:adapter].downcase.include?("sqlite")
   end
+
+  def mysql?
+    ActiveRecord::Base.connection.instance_values["config"][:adapter].downcase.include?("mysql")
+  end
 end
