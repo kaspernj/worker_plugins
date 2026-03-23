@@ -1,0 +1,1 @@
+Added a standalone `release:rubygems` Rake task that checks out `master`, fast-forwards from `origin/master`, bumps the gem version, commits and pushes the release, ensures `npm` is logged in, and publishes the gem to RubyGems.

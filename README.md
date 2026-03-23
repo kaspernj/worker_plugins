@@ -27,6 +27,24 @@ Optimally loop over resources on a workspace:
 workspace.each_resource(types: ['User']) do |user|
 ```
 
+## Release
+
+Run the release task from a clean worktree:
+
+```bash
+bundle exec rake release:patch
+```
+
+The task checks out `master`, fetches and fast-forwards from `origin/master`, bumps `lib/worker_plugins/version.rb`, commits and pushes the release commit, runs `npm login` if `npm whoami` shows no active session, then builds and pushes the gem to RubyGems and removes the generated `.gem` file afterward.
+
+Use `BUMP=minor`, `BUMP=major`, or `VERSION=x.y.z` to control the version bump:
+
+```bash
+bundle exec rake release:minor
+bundle exec rake release:major
+bundle exec rake release:rubygems VERSION=0.1.0
+```
+
 ## License
 
 This project rocks and uses MIT-LICENSE.
