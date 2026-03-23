@@ -3,9 +3,10 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
 
   has_many :workplace_links, dependent: :destroy
 
-  belongs_to :user, polymorphic: WorkerPlugins::UserRelationshipPolymorphic.execute!
+  belongs_to :user, polymorphic: WorkerPlugins::UserRelationshipPolymorphic.execute!, optional: true
 
   validates :name, presence: true
+  validate :validate_owner
 
   def each_resource(limit: nil, types: nil)
     count = 0
@@ -58,5 +59,13 @@ private
     end
 
     inserted_ids
+  end
+
+  def validate_owner
+    if user.present? && session_id.present?
+      errors.add(:base, "Workplace can't belong to both a user and a session")
+    elsif user.blank? && session_id.blank?
+      errors.add(:base, "Workplace must belong to a user or a session")
+    end
   end
 end
