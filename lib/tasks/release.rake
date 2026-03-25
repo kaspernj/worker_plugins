@@ -4,8 +4,8 @@ require "pathname"
 require "rubygems/version"
 require "shellwords"
 
-class WorkerPluginsRubygemsRelease
-  VERSION_FILE = Pathname.new(File.expand_path("../worker_plugins/version.rb", __dir__))
+class WorkerPluginsRubygemsRelease # rubocop:disable Lint/ConstantDefinitionInBlock
+  VERSION_FILE = Pathname.new(File.expand_path("../worker_plugins/version.rb", __dir__)) unless const_defined?(:VERSION_FILE)
 
   def call
     ensure_clean_worktree!
@@ -18,7 +18,6 @@ class WorkerPluginsRubygemsRelease
     bump_version!(next_version)
     commit!(next_version)
     push!
-    ensure_npm_login!
     gem_file = build_gem!(next_version)
     push_gem!(gem_file)
     delete_gem_file!(gem_file)
@@ -106,12 +105,6 @@ private
     run!("git", "push", remote_name, "master")
   end
 
-  def ensure_npm_login!
-    return if system("npm", "whoami", out: File::NULL, err: File::NULL)
-
-    run!("npm", "login")
-  end
-
   def build_gem!(next_version)
     gem_file = "worker_plugins-#{next_version}.gem"
     run!("gem", "build", "worker_plugins.gemspec")
@@ -154,25 +147,25 @@ end
 
 namespace :release do
   desc "Release a patch version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task patch: :environment do
+  task :patch do
     ENV["BUMP"] = "patch"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release a minor version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task minor: :environment do
+  task :minor do
     ENV["BUMP"] = "minor"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release a major version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task major: :environment do
+  task :major do
     ENV["BUMP"] = "major"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release the gem from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task rubygems: :environment do
+  task :rubygems do
     WorkerPluginsRubygemsRelease.new.call
   end
 end
