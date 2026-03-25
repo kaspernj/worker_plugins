@@ -5,7 +5,7 @@ require "rubygems/version"
 require "shellwords"
 
 class WorkerPluginsRubygemsRelease
-  VERSION_FILE = Pathname.new(File.expand_path("../lib/worker_plugins/version.rb", __dir__))
+  VERSION_FILE = Pathname.new(File.expand_path("../worker_plugins/version.rb", __dir__))
 
   def call
     ensure_clean_worktree!
