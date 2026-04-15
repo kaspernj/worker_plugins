@@ -24,4 +24,4 @@ APP_RAKEFILE = File.expand_path("spec/dummy/Rakefile", __dir__)
 load "rails/tasks/engine.rake"
 
 Bundler::GemHelper.install_tasks
-import "tasks/release.rake"
+import "lib/tasks/release.rake"
