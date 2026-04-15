@@ -60,13 +60,15 @@ private
   end
 
   def bumped_version
+    major, minor, patch = version_segments
+
     case bump_type
     when "major"
-      [version_segments[0] + 1, 0, 0].join(".")
+      format_version(major + 1, 0, 0)
     when "minor"
-      [version_segments[0], version_segments[1] + 1, 0].join(".")
+      format_version(major, minor + 1, 0)
     when "patch"
-      [version_segments[0], version_segments[1], version_segments[2] + 1].join(".")
+      format_version(major, minor, patch + 1)
     else
       raise "Unsupported BUMP=#{bump_type.inspect}. Use patch, minor, major, or VERSION=x.y.z."
     end
@@ -81,7 +83,11 @@ private
   end
 
   def current_version
-    @current_version ||= VERSION_FILE.read[/VERSION = "([^"]+)"/, 1] || raise("Could not find current version")
+    @current_version ||= VERSION_FILE.read[/VERSION = "([^"]+)"\.freeze/, 1] || raise("Could not find current version")
+  end
+
+  def format_version(major, minor, patch)
+    [major, minor, patch].join(".")
   end
 
   def bump_version!(next_version)
@@ -89,12 +95,17 @@ private
 
     VERSION_FILE.write(
       VERSION_FILE.read.sub(
-        /VERSION = "[^"]+"/,
-        %(VERSION = "#{next_version}")
+        /VERSION = "[^"]+"\.freeze/,
+        %(VERSION = "#{next_version}".freeze)
       )
     )
 
-    run!("git", "add", VERSION_FILE.to_s)
+    sync_lockfile!
+    run!("git", "add", VERSION_FILE.to_s, "Gemfile.lock")
+  end
+
+  def sync_lockfile!
+    run!("bundle", "lock")
   end
 
   def commit!(next_version)
@@ -146,25 +157,25 @@ private
 end
 
 namespace :release do
-  desc "Release a patch version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
+  desc "Release a patch version from master by fetching, fast-forward merging, bumping version, refreshing Gemfile.lock, pushing, and publishing"
   task patch: :environment do
     ENV["BUMP"] = "patch"
     WorkerPluginsRubygemsRelease.new.call
   end
 
-  desc "Release a minor version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
+  desc "Release a minor version from master by fetching, fast-forward merging, bumping version, refreshing Gemfile.lock, pushing, and publishing"
   task minor: :environment do
     ENV["BUMP"] = "minor"
     WorkerPluginsRubygemsRelease.new.call
   end
 
-  desc "Release a major version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
+  desc "Release a major version from master by fetching, fast-forward merging, bumping version, refreshing Gemfile.lock, pushing, and publishing"
   task major: :environment do
     ENV["BUMP"] = "major"
     WorkerPluginsRubygemsRelease.new.call
   end
 
-  desc "Release the gem from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
+  desc "Release the gem from master by fetching, fast-forward merging, bumping version, refreshing Gemfile.lock, pushing, and publishing"
   task rubygems: :environment do
     WorkerPluginsRubygemsRelease.new.call
   end
