@@ -33,8 +33,7 @@ describe WorkerPlugins::SwitchQuery do
       end
 
       lookup_queries = queries.select do |sql|
-        sql.include?("FROM \"tasks\"") &&
-          sql.include?("NOT IN") &&
+        sql.include?("tasks") &&
           sql.include?("worker_plugins_workplace_links")
       end
 
