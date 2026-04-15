@@ -1,0 +1,1 @@
+Added Peakflow database-matrix builds for `worker_plugins` so the test suite now runs against SQLite, Postgres, and MySQL/MariaDB, with env-driven dummy-app database configuration and the adapter gems needed for those CI jobs.

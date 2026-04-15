@@ -18,7 +18,7 @@ describe WorkerPlugins::SwitchQuery do
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
       expect(result.fetch(:mode)).to eq :created
-      expect(result.fetch(:created)).to eq [task1.id, task2.id]
+      expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
     end
 
     it "deletes all existing links and returns correct ids" do

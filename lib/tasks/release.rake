@@ -4,7 +4,7 @@ require "pathname"
 require "rubygems/version"
 require "shellwords"
 
-class WorkerPluginsRubygemsRelease # rubocop:disable Lint/ConstantDefinitionInBlock
+class WorkerPluginsRubygemsRelease
   VERSION_FILE = Pathname.new(File.expand_path("../worker_plugins/version.rb", __dir__)) unless const_defined?(:VERSION_FILE)
 
   def call
@@ -147,25 +147,25 @@ end
 
 namespace :release do
   desc "Release a patch version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task :patch do
+  task patch: :environment do
     ENV["BUMP"] = "patch"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release a minor version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task :minor do
+  task minor: :environment do
     ENV["BUMP"] = "minor"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release a major version from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task :major do
+  task major: :environment do
     ENV["BUMP"] = "major"
     WorkerPluginsRubygemsRelease.new.call
   end
 
   desc "Release the gem from master by fetching, fast-forward merging, bumping version, pushing, and publishing"
-  task :rubygems do
+  task rubygems: :environment do
     WorkerPluginsRubygemsRelease.new.call
   end
 end
