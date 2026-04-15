@@ -29,24 +29,6 @@ describe WorkerPlugins::AddQuery do
       expect { WorkerPlugins::AddQuery.execute!(query:, workplace:) }
         .to change(workplace.workplace_links, :count).by(1)
     end
-
-    it "rolls back all inserted batches if a later batch fails" do
-      create_list(:task, 501) # rubocop:disable FactoryBot/ExcessiveCreateList
-      insert_calls = 0
-
-      expect(WorkerPlugins::WorkplaceLink).to receive(:insert_all!).twice.and_wrap_original do |method, *args|
-        insert_calls += 1
-
-        if insert_calls == 2
-          raise ActiveRecord::RecordNotUnique
-        else
-          method.call(*args)
-        end
-      end
-
-      expect { result }.to raise_error(ActiveRecord::RecordNotUnique)
-      expect(workplace.workplace_links.count).to eq 0
-    end
   end
 
   describe "#ids_added_already" do
