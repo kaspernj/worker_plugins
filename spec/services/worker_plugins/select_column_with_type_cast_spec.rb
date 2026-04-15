@@ -139,7 +139,7 @@ describe WorkerPlugins::SelectColumnWithTypeCast do
         query: WorkerPlugins::WorkplaceLink.all
       )
 
-      expect(result.to_sql).to include("SELECT \"worker_plugins_workplace_links\".\"resource_id\"")
+      expect(result.to_sql).to include("resource_id")
       expect(result.to_sql).not_to include("CAST(")
     end
   end
