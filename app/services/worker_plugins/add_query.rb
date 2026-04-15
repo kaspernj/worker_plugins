@@ -16,18 +16,20 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   def add_query_to_workplace
     timestamp = Time.zone.now
 
-    created.each_slice(500) do |resource_ids|
-      WorkerPlugins::WorkplaceLink.insert_all!( # rubocop:disable Rails/SkipsModelValidations
-        resource_ids.map do |resource_id|
-          {
-            created_at: timestamp,
-            resource_id:,
-            resource_type: model_class.name,
-            updated_at: timestamp,
-            workplace_id: workplace.id
-          }
-        end
-      )
+    WorkerPlugins::WorkplaceLink.transaction do
+      created.each_slice(500) do |resource_ids|
+        WorkerPlugins::WorkplaceLink.insert_all!( # rubocop:disable Rails/SkipsModelValidations
+          resource_ids.map do |resource_id|
+            {
+              created_at: timestamp,
+              resource_id:,
+              resource_type: model_class.name,
+              updated_at: timestamp,
+              workplace_id: workplace.id
+            }
+          end
+        )
+      end
     end
   end
 

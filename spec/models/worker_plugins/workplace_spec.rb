@@ -61,6 +61,18 @@ describe WorkerPlugins::Workplace do
 
       expect(select_queries.length).to eq 2
     end
+
+    it "skips stale links whose resource has been deleted" do
+      link_task1
+      link_task2.destroy!
+
+      found_links = []
+      workplace.each_resource(types: ["Task"]) do |task|
+        found_links << task
+      end
+
+      expect(found_links).to eq [task1]
+    end
   end
 
   describe "#each_query_for_resources" do

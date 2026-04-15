@@ -17,7 +17,11 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
       resources_by_type_and_id = load_resources_by_type_and_id(workplace_links)
 
       workplace_links.each do |workplace_link|
-        yield resources_by_type_and_id.fetch(workplace_link.resource_type).fetch(workplace_link.resource_id.to_s)
+        resource = resources_by_type_and_id
+          .fetch(workplace_link.resource_type)[workplace_link.resource_id.to_s]
+        next unless resource
+
+        yield resource
         count += 1
         return if limit && count >= limit # rubocop:disable Lint/NonLocalExitFromIterator
       end
