@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_100902) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_15_143000) do
   create_table "tasks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -31,7 +31,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_100902) do
     t.string "resource_id", null: false
     t.string "resource_type", null: false
     t.datetime "updated_at", null: false
-    t.integer "workplace_id", null: false
+    t.bigint "workplace_id"
     t.index ["resource_type", "resource_id"], name: "index_on_resource"
     t.index ["workplace_id", "resource_type", "resource_id"], name: "unique_resource_on_workspace", unique: true
     t.index ["workplace_id"], name: "index_on_workplace_id"

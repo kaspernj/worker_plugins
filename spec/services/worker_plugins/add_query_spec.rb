@@ -17,13 +17,13 @@ describe WorkerPlugins::AddQuery do
       expect { result }
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
-      expect(result.fetch(:created)).to eq [task1.id, task2.id]
+      expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
     end
 
     it "doesnt add the same resource multiple times" do
       task1 = create(:task, user:)
       task2 = create(:task, user:)
-      query = User.joins(:tasks).where(id: [task1.id, task2.id])
+      query = User.joins(:tasks).where(tasks: {id: [task1.id, task2.id]})
 
       expect(query).to eq [user, user]
       expect { WorkerPlugins::AddQuery.execute!(query:, workplace:) }
@@ -45,7 +45,7 @@ describe WorkerPlugins::AddQuery do
     it "removes the order to fix crashes in postgres" do
       task1 = create(:task, user:)
       task2 = create(:task, user:)
-      query = User.joins(:tasks).where(id: [task1.id, task2.id]).order(:name)
+      query = User.joins(:tasks).where(tasks: {id: [task1.id, task2.id]}).order(:name)
       service = WorkerPlugins::AddQuery.new(query:, workplace:)
       sql = service.resources_to_add.to_sql
 
