@@ -12,6 +12,8 @@ group :development do
   gem "awesome_translations"
   gem "factory_bot_rails"
   gem "jquery-rails"
+  gem "mysql2"
+  gem "pg"
   gem "pry-rails"
   gem "rspec-rails"
   gem "rubocop"
