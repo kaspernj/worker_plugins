@@ -46,6 +46,14 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
   end
 
   def same_type?
-    column_to_select.type == column_to_compare_with.type
+    column_to_select.type == column_to_compare_with.type || mysql_string_uuid_compatible_types?
+  end
+
+  def mysql_string_uuid_compatible_types?
+    return false unless mysql?
+
+    types = [column_to_select.type, column_to_compare_with.type]
+
+    types.include?(:string) && types.include?(:uuid)
   end
 end
