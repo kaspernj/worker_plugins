@@ -1,6 +1,9 @@
 require "rails_helper"
+require_relative "../../support/sql_query_counter"
 
 describe WorkerPlugins::SwitchQuery do
+  include SqlQueryCounter
+
   let(:task1) { create :task }
   let(:task2) { create :task }
   let(:link1) { create :workplace_link, resource: task1, workplace: }
@@ -19,6 +22,22 @@ describe WorkerPlugins::SwitchQuery do
 
       expect(result.fetch(:mode)).to eq :created
       expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
+    end
+
+    it "avoids an extra existence probe before the add query runs" do
+      task1
+      task2
+
+      queries = capture_sql_queries do
+        WorkerPlugins::SwitchQuery.execute!(query: Task.all, workplace:)
+      end
+
+      lookup_queries = queries.select do |sql|
+        sql.include?("tasks") &&
+          sql.include?("worker_plugins_workplace_links")
+      end
+
+      expect(lookup_queries.length).to eq 2
     end
 
     it "deletes all existing links and returns correct ids" do

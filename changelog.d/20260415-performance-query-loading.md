@@ -1,0 +1,1 @@
+Improved workplace resource iteration and query status performance by batching linked resource loads, avoiding repeated workplace-link id scans, and tightening query-status counting to the matching resource type.
