@@ -14,7 +14,21 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def add_query_to_workplace
-    WorkerPlugins::WorkplaceLink.connection.execute(sql)
+    timestamp = Time.zone.now
+
+    created.each_slice(500) do |resource_ids|
+      WorkerPlugins::WorkplaceLink.insert_all!( # rubocop:disable Rails/SkipsModelValidations
+        resource_ids.map do |resource_id|
+          {
+            created_at: timestamp,
+            resource_id:,
+            resource_type: model_class.name,
+            updated_at: timestamp,
+            workplace_id: workplace.id
+          }
+        end
+      )
+    end
   end
 
   def created
@@ -56,44 +70,5 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
       .distinct
       .where
       .not(id: ids_added_already)
-  end
-
-  def select_sql
-    @select_sql ||= resources_to_add
-      .select("
-        #{db_now_value},
-        #{quote(resources_to_add.klass.name)},
-        #{quote_table(resources_to_add.klass.table_name)}.#{quote_column(primary_key)},
-        #{db_now_value},
-        #{select_workplace_id_sql}
-      ")
-      .to_sql
-  end
-
-  def select_workplace_id_sql
-    workplace_id_column = WorkerPlugins::WorkplaceLink.columns.find { |column| column.name == "workplace_id" }
-
-    if workplace_id_column.type == :uuid
-      "CAST(#{quote(workplace.id)} AS UUID)"
-    else
-      quote(workplace.id)
-    end
-  end
-
-  def sql
-    @sql ||= "
-      INSERT INTO
-        worker_plugins_workplace_links
-
-      (
-        created_at,
-        resource_type,
-        resource_id,
-        updated_at,
-        workplace_id
-      )
-
-      #{select_sql}
-    "
   end
 end

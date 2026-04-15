@@ -4,7 +4,7 @@ class WorkerPlugins::QueryLinksStatus < WorkerPlugins::ApplicationService
   def perform
     checked_count = workplace
       .workplace_links
-      .where(resource_id: query.distinct.select(query.klass.primary_key))
+      .where(resource_type: query.klass.name, resource_id: query.distinct.select(query.klass.primary_key))
       .count
 
     query_count = query.count
