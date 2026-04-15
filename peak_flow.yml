@@ -1,8 +1,82 @@
 before_install:
-  - gem install bundler -v 2.1.2
-before_script:
-  - bundle exec rails db:migrate
+  - sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev libpq-dev mariadb-client postgresql-client
+services:
+  mariadb:
+    environment:
+      MARIADB_USER: build
+      MARIADB_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: worker_plugins_test
+    image: mariadb:11.2.2
+    expose:
+      - 3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$MARIADB_USER -p$MARIADB_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart_policy: on-failure
+  postgres:
+    environment:
+      POSTGRES_USER: build
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: worker_plugins_test
+    image: postgres:16
+    expose:
+      - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart_policy: on-failure
 rvm: true
-script:
-  - bundle exec rspec
-  - bundle exec rubocop --enable-pending-cops
+environment:
+  RUBY_VERSION: 3.2.2
+builds:
+  setup:
+    name: Setup
+    script:
+      - gem install bundler -v 2.1.2
+      - bundle install --jobs 6 --without production staging
+    builds:
+      sqlite_rspec:
+        name: RSpec SQLite
+        environment:
+          DB_ADAPTER: sqlite3
+          RAILS_ENV: test
+        script:
+          - bundle exec rails db:create db:migrate
+          - bundle exec rspec
+      postgres_rspec:
+        name: RSpec Postgres
+        environment:
+          DB_ADAPTER: postgresql
+          DB_HOST: postgres
+          DB_NAME_TEST: worker_plugins_test
+          DB_PASSWORD: password
+          DB_PORT: 5432
+          DB_USERNAME: build
+          RAILS_ENV: test
+        script:
+          - wait-for-it postgres:5432
+          - bundle exec rails db:create db:migrate
+          - bundle exec rspec
+      mysql_rspec:
+        name: RSpec MySQL
+        environment:
+          DB_ADAPTER: mysql2
+          DB_HOST: mariadb
+          DB_NAME_TEST: worker_plugins_test
+          DB_PASSWORD: password
+          DB_PORT: 3306
+          DB_USERNAME: build
+          RAILS_ENV: test
+        script:
+          - wait-for-it mariadb:3306
+          - bundle exec rails db:create db:migrate
+          - bundle exec rspec
+      rubocop:
+        name: Rubocop
+        script:
+          - bundle exec rubocop --enable-pending-cops
