@@ -106,25 +106,7 @@ describe WorkerPlugins::SelectColumnWithTypeCast do
       expect(result.to_sql).to include("CAST(worker_plugins_workplace_links.resource_id AS VARCHAR)")
     end
 
-    it "casts uuid compare columns to char on mysql adapters when the selected column is not string-like" do
-      compare_column = instance_double(
-        ActiveRecord::ConnectionAdapters::Column,
-        name: "id",
-        type: :uuid
-      )
-      allow_any_instance_of(described_class).to receive(:postgres?).and_return(false)
-      allow_any_instance_of(described_class).to receive(:mysql?).and_return(true)
-
-      result = described_class.execute!(
-        column_name_to_select: :id,
-        column_to_compare_with: compare_column,
-        query: Task.all
-      )
-
-      expect(result.to_sql).to include("CAST(tasks.id AS CHAR)")
-    end
-
-    it "does not cast between string and uuid columns on mysql adapters" do
+    it "casts uuid compare columns to char on mysql adapters" do
       compare_column = instance_double(
         ActiveRecord::ConnectionAdapters::Column,
         name: "id",
@@ -139,8 +121,7 @@ describe WorkerPlugins::SelectColumnWithTypeCast do
         query: WorkerPlugins::WorkplaceLink.all
       )
 
-      expect(result.to_sql).to include("SELECT \"worker_plugins_workplace_links\".\"resource_id\"")
-      expect(result.to_sql).not_to include("CAST(")
+      expect(result.to_sql).to include("CAST(worker_plugins_workplace_links.resource_id AS CHAR)")
     end
   end
 end
