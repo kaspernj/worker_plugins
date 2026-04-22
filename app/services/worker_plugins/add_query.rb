@@ -73,8 +73,11 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
     # primary keys to the `resource_id` VARCHAR column. Postgres is strict about
     # types and needs an explicit cast.
     return primary_key_column unless postgres?
-    return primary_key_column if model_class.column_for_attribute(model_class.primary_key).type ==
-                                 WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id).type
+
+    primary_key_type = model_class.column_for_attribute(model_class.primary_key).type
+    resource_id_type = WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id).type
+
+    return primary_key_column if primary_key_type == resource_id_type
 
     "CAST(#{primary_key_column} AS VARCHAR)"
   end
