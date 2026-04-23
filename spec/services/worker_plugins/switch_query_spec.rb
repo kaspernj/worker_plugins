@@ -24,7 +24,7 @@ describe WorkerPlugins::SwitchQuery do
       expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
     end
 
-    it "avoids an extra existence probe before the add query runs" do
+    it "only touches both tables in a single cross-table statement" do
       task1
       task2
 
@@ -32,12 +32,13 @@ describe WorkerPlugins::SwitchQuery do
         WorkerPlugins::SwitchQuery.execute!(query: Task.all, workplace:)
       end
 
-      lookup_queries = queries.select do |sql|
+      cross_table_queries = queries.select do |sql|
         sql.include?("tasks") &&
           sql.include?("worker_plugins_workplace_links")
       end
 
-      expect(lookup_queries.length).to eq 2
+      expect(cross_table_queries.length).to eq 1
+      expect(cross_table_queries.first).to match(/INSERT .* INTO/i)
     end
 
     it "deletes all existing links and returns correct ids" do

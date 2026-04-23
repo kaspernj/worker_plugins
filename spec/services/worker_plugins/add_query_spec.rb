@@ -29,6 +29,16 @@ describe WorkerPlugins::AddQuery do
       expect { WorkerPlugins::AddQuery.execute!(query:, workplace:) }
         .to change(workplace.workplace_links, :count).by(1)
     end
+
+    it "returns only newly-added ids when some rows are already linked" do
+      link1 # task1 is already linked to workplace
+      task2
+
+      result = WorkerPlugins::AddQuery.execute!(query: Task.all, workplace:)
+
+      expect(result.fetch(:created)).to contain_exactly(task2.id)
+      expect(workplace.workplace_links.where(resource_type: "Task").count).to eq 2
+    end
   end
 
   describe "#ids_added_already" do

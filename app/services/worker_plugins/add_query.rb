@@ -8,7 +8,7 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def perform
-    created # Cache which are about to be created
+    created # Capture already_linked_ids and candidate_ids before the INSERT
     add_query_to_workplace
     succeed!(created:)
   end
@@ -17,8 +17,26 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
     WorkerPlugins::WorkplaceLink.connection.execute(sql)
   end
 
+  # The previous implementation ran the same expensive `NOT EXISTS` anti-join
+  # twice — once via `pluck` to build `created`, and again inside the
+  # `INSERT ... SELECT`. On workplaces with hundreds of thousands of candidate
+  # rows that doubled the wall time. We now compute `created` by diffing a
+  # cheap index-only scan of the candidate primary keys against a cheap
+  # index-only scan of this workplace's existing links, and let the INSERT
+  # itself dedupe through the `unique_resource_on_workspace` index.
   def created
-    @created ||= resources_to_add.pluck(primary_key.to_sym)
+    @created ||= begin
+      linked = already_linked_ids_as_strings
+      candidate_ids.reject { |id| linked.include?(id.to_s) }
+    end
+  end
+
+  def candidate_ids
+    @candidate_ids ||= resources_to_add.pluck(primary_key.to_sym)
+  end
+
+  def already_linked_ids_as_strings
+    @already_linked_ids_as_strings ||= ids_added_already_query.pluck(:resource_id).to_set
   end
 
   def ids_added_already_query
@@ -40,46 +58,16 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def primary_key
-    @primary_key ||= resources_to_add.klass.primary_key
+    @primary_key ||= model_class.primary_key
   end
 
   def resources_to_add
-    # Correlate per row with NOT EXISTS instead of NOT IN + a materialized
-    # subquery. The old form expanded into a nested `resource_id IN (SELECT
-    # CAST(users.id AS CHAR) FROM users)` that did a full scan of the target
-    # table when the outer query was unfiltered — 60s+ on 340k+ users. This
-    # uses the `(workplace_id, resource_type, resource_id)` composite index
-    # for an index seek per row.
-    @resources_to_add ||= query
-      .distinct
-      .where("NOT EXISTS (#{existing_workplace_link_exists_sql})")
-  end
-
-  def existing_workplace_link_exists_sql
-    resource_id_column = "#{quote_table(WorkerPlugins::WorkplaceLink.table_name)}.#{quote_column(:resource_id)}"
-
-    workplace
-      .workplace_links
-      .where(resource_type: model_class.name)
-      .where("#{resource_id_column} = #{model_primary_key_cast_for_resource_id}")
-      .select(1)
-      .to_sql
-  end
-
-  def model_primary_key_cast_for_resource_id
-    primary_key_column = "#{quote_table(model_class.table_name)}.#{quote_column(model_class.primary_key)}"
-
-    # MySQL and SQLite do implicit conversion when comparing integer/uuid/string
-    # primary keys to the `resource_id` VARCHAR column. Postgres is strict about
-    # types and needs an explicit cast.
-    return primary_key_column unless postgres?
-
-    primary_key_type = model_class.column_for_attribute(model_class.primary_key).type
-    resource_id_type = WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id).type
-
-    return primary_key_column if primary_key_type == resource_id_type
-
-    "CAST(#{primary_key_column} AS VARCHAR)"
+    # The unique index on `(workplace_id, resource_type, resource_id)` lets us
+    # skip the `WHERE NOT EXISTS` anti-join entirely — duplicates are rejected
+    # on INSERT by the dialect-specific conflict clause in #sql. `.distinct`
+    # still handles same-row duplicates produced by joins in the caller's
+    # query (e.g. `User.joins(:tasks)`).
+    @resources_to_add ||= query.distinct
   end
 
   def select_sql
@@ -106,7 +94,7 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
 
   def sql
     @sql ||= "
-      INSERT INTO
+      #{insert_clause} INTO
         worker_plugins_workplace_links
 
       (
@@ -118,6 +106,23 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
       )
 
       #{select_sql}
+      #{conflict_clause}
     "
+  end
+
+  def insert_clause
+    if mysql?
+      "INSERT IGNORE"
+    elsif sqlite?
+      "INSERT OR IGNORE"
+    else
+      "INSERT"
+    end
+  end
+
+  def conflict_clause
+    return "" unless postgres?
+
+    "ON CONFLICT (workplace_id, resource_type, resource_id) DO NOTHING"
   end
 end
