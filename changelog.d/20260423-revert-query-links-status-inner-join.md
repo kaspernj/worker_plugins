@@ -1,0 +1,3 @@
+Reverted the `INNER JOIN` short-circuit added to `WorkerPlugins::QueryLinksStatus#count_linked_rows` in 0.0.16. MariaDB's planner picked the slower of the two join directions (links → users PK probe) on a 340k+ row target, pushing the checked-count probe from 2.2 s with the `resource_id IN (SELECT ... FROM <target>)` form to **13.6 s** with the JOIN. Restored the IN-subquery form, which is correct (orphaned links are still excluded) and faster in practice on MariaDB. The `relation_unscoped?` helper stays — it's still used by `RemoveQuery`.
+
+Further optimization of this probe — caching the count on the workplace, scheduled orphan-link cleanup, etc. — is a separate track.
