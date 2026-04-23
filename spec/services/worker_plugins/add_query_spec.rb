@@ -29,6 +29,29 @@ describe WorkerPlugins::AddQuery do
       expect { WorkerPlugins::AddQuery.execute!(query:, workplace:) }
         .to change(workplace.workplace_links, :count).by(1)
     end
+
+    it "returns only newly-added ids when some rows are already linked" do
+      link1 # task1 is already linked to workplace
+      task2
+
+      result = WorkerPlugins::AddQuery.execute!(query: Task.all, workplace:)
+
+      expect(result.fetch(:created)).to contain_exactly(task2.id)
+      expect(workplace.workplace_links.where(resource_type: "Task").count).to eq 2
+    end
+
+    it "filters already-linked rows before applying LIMIT so the window stays full" do
+      tasks = create_list(:task, 3)
+      # Link the first two; only the third is unlinked.
+      tasks[0..1].each { |task| create(:workplace_link, resource: task, workplace:) }
+
+      # limit(2) without pre-filtering would return the first two tasks, both
+      # already linked, and insert zero new rows. With pre-filtering it should
+      # skip them and insert the third.
+      result = WorkerPlugins::AddQuery.execute!(query: Task.limit(2), workplace:)
+
+      expect(result.fetch(:created)).to contain_exactly(tasks[2].id)
+    end
   end
 
   describe "#ids_added_already" do
