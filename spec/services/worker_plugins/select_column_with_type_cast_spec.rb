@@ -142,5 +142,31 @@ describe WorkerPlugins::SelectColumnWithTypeCast do
       expect(result.to_sql).to include("resource_id")
       expect(result.to_sql).not_to include("CAST(")
     end
+
+    it "does not cast on mysql when the selected column has an unknown type against a string compare column" do
+      # Covers MariaDB's native UUID type, which older mysql2 adapters surface
+      # as an unknown (nil) type rather than :uuid or :string.
+      compare_column = instance_double(
+        ActiveRecord::ConnectionAdapters::Column,
+        name: "resource_id",
+        type: :string
+      )
+      select_column = instance_double(
+        ActiveRecord::ConnectionAdapters::Column,
+        name: "id",
+        type: nil
+      )
+      allow(User).to receive(:column_for_attribute).with(:id).and_return(select_column)
+      allow_any_instance_of(described_class).to receive(:postgres?).and_return(false)
+      allow_any_instance_of(described_class).to receive(:mysql?).and_return(true)
+
+      result = described_class.execute!(
+        column_name_to_select: :id,
+        column_to_compare_with: compare_column,
+        query: User.all
+      )
+
+      expect(result.to_sql).not_to include("CAST(")
+    end
   end
 end
