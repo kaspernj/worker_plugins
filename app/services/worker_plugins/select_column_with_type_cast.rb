@@ -46,14 +46,24 @@ class WorkerPlugins::SelectColumnWithTypeCast < WorkerPlugins::ApplicationServic
   end
 
   def same_type?
-    column_to_select.type == column_to_compare_with.type || mysql_string_uuid_compatible_types?
+    return true if column_to_select.type == column_to_compare_with.type
+
+    mysql_implicit_conversion_safe?
   end
 
-  def mysql_string_uuid_compatible_types?
+  # On MySQL / MariaDB, implicit conversion handles comparisons between any
+  # string-ish column types (VARCHAR, CHAR, BINARY, UUID, or types AR doesn't
+  # recognize — e.g. MariaDB's native UUID type when using an older mysql2
+  # adapter). The explicit CAST is only needed when one side is numeric,
+  # because MySQL would then force a string → number conversion that loses
+  # rows containing non-numeric values.
+  def mysql_implicit_conversion_safe?
     return false unless mysql?
 
-    types = [column_to_select.type, column_to_compare_with.type]
+    !numeric_type?(column_to_select.type) && !numeric_type?(column_to_compare_with.type)
+  end
 
-    types.include?(:string) && types.include?(:uuid)
+  def numeric_type?(type)
+    %i[integer decimal float bigint].include?(type)
   end
 end
