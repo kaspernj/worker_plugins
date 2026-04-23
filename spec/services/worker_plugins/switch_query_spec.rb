@@ -38,7 +38,7 @@ describe WorkerPlugins::SwitchQuery do
       end
 
       expect(cross_table_queries.length).to eq 1
-      expect(cross_table_queries.first).to match(/INSERT .* INTO/i)
+      expect(cross_table_queries.first).to match(/INSERT\b.*\bINTO\b/im)
     end
 
     it "deletes all existing links and returns correct ids" do
