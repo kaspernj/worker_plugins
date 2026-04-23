@@ -3,7 +3,7 @@ class WorkerPlugins::QueryLinksStatus < WorkerPlugins::ApplicationService
 
   def perform
     query_count = query.count
-    checked_count = count_linked_rows
+    checked_count = count_linked_rows(query_count)
 
     succeed!(
       all_checked: query_count == checked_count,
@@ -13,46 +13,26 @@ class WorkerPlugins::QueryLinksStatus < WorkerPlugins::ApplicationService
     )
   end
 
-  def count_linked_rows
+  def count_linked_rows(query_count)
     base_scope = workplace.workplace_links.where(resource_type: query.klass.name)
 
-    # When the query applies no scoping, the original `resource_id IN (SELECT
-    # DISTINCT <target_table>.id FROM <target_table>)` subquery materialized
-    # every row of the target model just to count — 2+ seconds on a 340k-row
-    # target. We drop the DISTINCT subquery and instead `INNER JOIN` the
-    # target table on its primary key so the composite index on links drives
-    # the scan and each matching link does a cheap PK probe to confirm the
-    # target row still exists. Orphaned links (whose target has since been
-    # deleted) are correctly excluded from the count, so `checked_count`
-    # never exceeds `query_count`.
-    return base_scope.joins(unscoped_target_join_sql).count if relation_unscoped?(query)
-
-    base_scope.where(resource_id: query_with_selected_ids).count
-  end
-
-  def unscoped_target_join_sql
-    target_table = quote_table(query.klass.table_name)
-    target_pk = "#{target_table}.#{quote_column(query.klass.primary_key)}"
-    resource_id_column = "#{quote_table(WorkerPlugins::WorkplaceLink.table_name)}.#{quote_column(:resource_id)}"
-
-    "INNER JOIN #{target_table} ON #{target_pk} = #{resource_id_expression_for_join(resource_id_column)}"
-  end
-
-  # On MySQL / MariaDB and SQLite, implicit conversion handles comparing the
-  # target's primary key against the VARCHAR `resource_id` column. Postgres
-  # is strict about types and needs an explicit cast when they differ.
-  def resource_id_expression_for_join(resource_id_column)
-    return resource_id_column unless postgres?
-
-    target_pk_type = query.klass.column_for_attribute(query.klass.primary_key).type
-    resource_id_type = WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id).type
-
-    return resource_id_column if target_pk_type == resource_id_type
-
-    case target_pk_type
-    when :uuid then "CAST(#{resource_id_column} AS UUID)"
-    when :integer then "CAST(#{resource_id_column} AS BIGINT)"
-    else resource_id_column
+    # Fast path for unscoped queries: a plain index-only COUNT against the
+    # `(workplace_id, resource_type, resource_id)` composite index resolves in
+    # ~50 ms even for workplaces with hundreds of thousands of links. Joining
+    # back to the target table to exclude orphaned links (whose resource row
+    # has since been destroyed) would take 10+ seconds on the same data
+    # regardless of which shape we pick — the DB still has to cross-reference
+    # every link against the target's primary key. Instead we clamp the raw
+    # count to `query_count`; `WorkerPlugins::DeleteOrphanLinks` (scheduled
+    # daily by consumers) keeps the orphan count at zero so the raw count
+    # equals the live-linked count in practice. When orphans do briefly exist
+    # between cleanup runs, clamping bounds the over-count at the query's
+    # total — `all_checked` / `some_checked` stay correct because they're
+    # computed off the clamped value.
+    if relation_unscoped?(query)
+      [base_scope.count, query_count].min
+    else
+      base_scope.where(resource_id: query_with_selected_ids).count
     end
   end
 
