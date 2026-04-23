@@ -47,5 +47,18 @@ describe WorkerPlugins::RemoveQuery do
       expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
       expect { link2.reload }.not_to raise_error
     end
+
+    it "keeps the subquery when the query is scoped with .from" do
+      link1
+      link2 = create(:workplace_link, resource: task2, workplace:)
+
+      from_query = Task.from(Task.where(id: task1.id), :tasks)
+
+      result = WorkerPlugins::RemoveQuery.execute!(query: from_query, workplace:)
+
+      expect(result.fetch(:affected_count)).to eq 1
+      expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      expect { link2.reload }.not_to raise_error
+    end
   end
 end
