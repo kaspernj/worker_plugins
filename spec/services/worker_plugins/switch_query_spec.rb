@@ -13,7 +13,7 @@ describe WorkerPlugins::SwitchQuery do
   let(:workplace) { create :workplace, user: }
 
   describe "#execute!" do
-    it "adds all found tasks" do
+    it "adds all found tasks when nothing is linked yet" do
       task1
       task2
 
@@ -21,10 +21,10 @@ describe WorkerPlugins::SwitchQuery do
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
       expect(result.fetch(:mode)).to eq :created
-      expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
+      expect(result.fetch(:affected_count)).to eq 2
     end
 
-    it "only touches both tables in a single cross-table statement" do
+    it "only touches both tables in a single cross-table statement on add" do
       task1
       task2
 
@@ -41,7 +41,7 @@ describe WorkerPlugins::SwitchQuery do
       expect(cross_table_queries.first).to match(/INSERT\b.*\bINTO\b/im)
     end
 
-    it "deletes all existing links and returns correct ids" do
+    it "deletes all existing links when every candidate is already linked" do
       link1
 
       expect { result }
@@ -49,7 +49,7 @@ describe WorkerPlugins::SwitchQuery do
 
       expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
       expect(result.fetch(:mode)).to eq :destroyed
-      expect(result.fetch(:destroyed)).to eq [task1.id.to_s]
+      expect(result.fetch(:affected_count)).to eq 1
     end
   end
 end

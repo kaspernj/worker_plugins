@@ -17,7 +17,7 @@ describe WorkerPlugins::AddQuery do
       expect { result }
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
-      expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
+      expect(result.fetch(:affected_count)).to eq 2
     end
 
     it "doesnt add the same resource multiple times" do
@@ -30,13 +30,13 @@ describe WorkerPlugins::AddQuery do
         .to change(workplace.workplace_links, :count).by(1)
     end
 
-    it "returns only newly-added ids when some rows are already linked" do
+    it "reports only newly-added rows when some already exist" do
       link1 # task1 is already linked to workplace
       task2
 
       result = WorkerPlugins::AddQuery.execute!(query: Task.all, workplace:)
 
-      expect(result.fetch(:created)).to contain_exactly(task2.id)
+      expect(result.fetch(:affected_count)).to eq 1
       expect(workplace.workplace_links.where(resource_type: "Task").count).to eq 2
     end
 
@@ -50,7 +50,8 @@ describe WorkerPlugins::AddQuery do
       # skip them and insert the third.
       result = WorkerPlugins::AddQuery.execute!(query: Task.limit(2), workplace:)
 
-      expect(result.fetch(:created)).to contain_exactly(tasks[2].id)
+      expect(result.fetch(:affected_count)).to eq 1
+      expect(workplace.workplace_links.where(resource: tasks[2]).count).to eq 1
     end
   end
 
