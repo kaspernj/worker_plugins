@@ -27,6 +27,46 @@ Optimally loop over resources on a workspace:
 workspace.each_resource(types: ['User']) do |user|
 ```
 
+## Scheduled cleanup of unused workplaces
+
+`WorkerPlugins::DeleteOldWorkplaces` removes workplaces that haven't seen activity in a given window — both the workplace row's `updated_at` is older than the cutoff *and* no link on it has been created or updated since. Deletion runs in batches via raw `delete_all` to skip per-row callbacks.
+
+```ruby
+result = WorkerPlugins::DeleteOldWorkplaces.execute!(older_than: 2.months)
+# => {workplaces_deleted: <N>, links_deleted: <M>}
+```
+
+Options:
+
+- `older_than:` (required) — any object that responds to `.ago` (typically an `ActiveSupport::Duration` like `2.months` or `30.days`). The service computes the cutoff at call time.
+- `batch_size:` (default `1000`) — how many stale workplaces to delete per round-trip.
+
+The gem does not register a scheduler of its own. Wire the service into your application's background queue. Example with `sidekiq-scheduler`:
+
+```ruby
+# config/sidekiq.yml
+:scheduler:
+  :schedule:
+    DeleteOldWorkplaces:
+      cron: "0 40 3 * * *"   # daily at 03:40 local time
+      args: ["WorkerPlugins::DeleteOldWorkplaces", {"older_than": "2.months"}]
+      class: ServiceScheduler  # or whatever your project's service-dispatching worker is called
+      queue: low_priority
+```
+
+If your `ServiceScheduler` only accepts YAML-serializable arguments, wrap the call in a thin application-side service:
+
+```ruby
+class Workplaces::DeleteOld < ApplicationService
+  def perform
+    WorkerPlugins::DeleteOldWorkplaces.execute!(older_than: 2.months)
+    succeed!
+  end
+end
+```
+
+and schedule `Workplaces::DeleteOld` instead.
+
 ## Release
 
 Run the release task from a clean worktree:
