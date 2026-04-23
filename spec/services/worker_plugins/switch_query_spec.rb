@@ -13,7 +13,7 @@ describe WorkerPlugins::SwitchQuery do
   let(:workplace) { create :workplace, user: }
 
   describe "#execute!" do
-    it "adds all found tasks" do
+    it "adds all found tasks when nothing is linked yet" do
       task1
       task2
 
@@ -21,27 +21,33 @@ describe WorkerPlugins::SwitchQuery do
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
       expect(result.fetch(:mode)).to eq :created
-      expect(result.fetch(:created)).to contain_exactly(task1.id, task2.id)
+      expect(result.fetch(:affected_count)).to eq 2
     end
 
-    it "only touches both tables in a single cross-table statement" do
+    it "probes for unlinked candidates before running the insert" do
+      # Materialize fixtures outside the capture block so only SwitchQuery's
+      # own SQL is recorded.
       task1
       task2
+      workplace
 
       queries = capture_sql_queries do
         WorkerPlugins::SwitchQuery.execute!(query: Task.all, workplace:)
       end
 
-      cross_table_queries = queries.select do |sql|
-        sql.include?("tasks") &&
-          sql.include?("worker_plugins_workplace_links")
+      probe_sql_idx = queries.find_index do |sql|
+        sql =~ /\ASELECT/i && sql.include?("NOT EXISTS")
+      end
+      insert_sql_idx = queries.find_index do |sql|
+        sql.match?(/INSERT\b.*\binto\b.*worker_plugins_workplace_links/im)
       end
 
-      expect(cross_table_queries.length).to eq 1
-      expect(cross_table_queries.first).to match(/INSERT\b.*\bINTO\b/im)
+      expect(probe_sql_idx).not_to be_nil, "expected a pre-insert NOT EXISTS probe; got: #{queries.inspect}"
+      expect(insert_sql_idx).not_to be_nil, "expected an INSERT into worker_plugins_workplace_links; got: #{queries.inspect}"
+      expect(probe_sql_idx).to be < insert_sql_idx
     end
 
-    it "deletes all existing links and returns correct ids" do
+    it "deletes all existing links when every candidate is already linked" do
       link1
 
       expect { result }
@@ -49,7 +55,7 @@ describe WorkerPlugins::SwitchQuery do
 
       expect { link1.reload }.to raise_error(ActiveRecord::RecordNotFound)
       expect(result.fetch(:mode)).to eq :destroyed
-      expect(result.fetch(:destroyed)).to eq [task1.id.to_s]
+      expect(result.fetch(:affected_count)).to eq 1
     end
   end
 end

@@ -8,35 +8,11 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def perform
-    created # Capture already_linked_ids and candidate_ids before the INSERT
-    add_query_to_workplace
-    succeed!(created:)
+    succeed!(affected_count: add_query_to_workplace)
   end
 
   def add_query_to_workplace
-    WorkerPlugins::WorkplaceLink.connection.execute(sql)
-  end
-
-  # The previous implementation ran the same expensive `NOT EXISTS` anti-join
-  # twice — once via `pluck` to build `created`, and again inside the
-  # `INSERT ... SELECT`. On workplaces with hundreds of thousands of candidate
-  # rows that doubled the wall time. We now compute `created` by diffing a
-  # cheap index-only scan of the candidate primary keys against a cheap
-  # index-only scan of this workplace's existing links, and let the INSERT
-  # itself dedupe through the `unique_resource_on_workspace` index.
-  def created
-    @created ||= begin
-      linked = already_linked_ids_as_strings
-      candidate_ids.reject { |id| linked.include?(id.to_s) }
-    end
-  end
-
-  def candidate_ids
-    @candidate_ids ||= resources_to_add.pluck(primary_key.to_sym)
-  end
-
-  def already_linked_ids_as_strings
-    @already_linked_ids_as_strings ||= ids_added_already_query.pluck(:resource_id).to_set
+    WorkerPlugins::WorkplaceLink.connection.exec_update(sql, "WorkerPlugins::AddQuery INSERT", [])
   end
 
   def ids_added_already_query
@@ -68,10 +44,10 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
     # clause in #sql. `.distinct` still handles same-row duplicates produced
     # by joins in the caller's query (e.g. `User.joins(:tasks)`).
     #
-    # When the caller scopes with `.limit` / `.offset`, we have to keep the
-    # anti-join so already-linked rows are filtered *before* the window is
-    # applied; otherwise `Task.limit(100)` could insert fewer than 100 new
-    # rows when some of those 100 are already linked.
+    # When the caller scopes with `.limit` / `.offset`, we keep the anti-join
+    # so already-linked rows are filtered *before* the window is applied;
+    # otherwise `Task.limit(100)` could insert fewer than 100 new rows when
+    # some of those 100 are already linked.
     @resources_to_add ||= if query.limit_value || query.offset_value
       query.distinct.where("NOT EXISTS (#{existing_workplace_link_exists_sql})")
     else
