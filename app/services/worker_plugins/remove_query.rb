@@ -23,16 +23,15 @@ class WorkerPlugins::RemoveQuery < WorkerPlugins::ApplicationService
   # everything matching the query") and is the correct thing to do with
   # dead references anyway.
   def unscoped_query?
-    relation = query
-    relation.where_clause.empty? &&
-      relation.joins_values.empty? &&
-      relation.left_outer_joins_values.empty? &&
-      relation.group_values.empty? &&
-      relation.having_clause.empty? &&
-      relation.limit_value.nil? &&
-      relation.offset_value.nil? &&
-      relation.from_clause.value.nil? &&
-      relation.with_values.empty?
+    @query.where_clause.empty? &&
+      @query.joins_values.empty? &&
+      @query.left_outer_joins_values.empty? &&
+      @query.group_values.empty? &&
+      @query.having_clause.empty? &&
+      @query.limit_value.nil? &&
+      @query.offset_value.nil? &&
+      @query.from_clause.value.nil? &&
+      @query.with_values.empty?
   end
 
   def model_class
