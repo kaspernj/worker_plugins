@@ -67,19 +67,6 @@ end
 
 and schedule `Workplaces::DeleteOld` instead.
 
-## Scheduled cleanup of orphan links
-
-`WorkerPlugins::DeleteOrphanLinks` removes `worker_plugins_workplace_links` whose target row no longer exists — i.e. links that point at a resource that was destroyed without the link being cleaned up alongside. Run it periodically from a background job to keep the links table consistent and keep probes like `QueryLinksStatus#checked_count` honest.
-
-```ruby
-result = WorkerPlugins::DeleteOrphanLinks.execute!
-# => {deleted_count: <N>}
-```
-
-Links whose `resource_type` doesn't resolve to a Ruby class (e.g. a model was renamed or removed) are left alone — cleaning those up requires human judgement.
-
-Schedule the same way as `DeleteOldWorkplaces` — typically once a day off-hours.
-
 ## Release
 
 Run the release task from a clean worktree:
