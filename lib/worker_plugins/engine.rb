@@ -1,9 +1,9 @@
-module WorkerPlugins
-  class Engine < Rails::Engine
-    isolate_namespace WorkerPlugins
+module WorkerPlugins; end
 
-    # Add translations to load path.
-    path = File.realpath(File.join(File.dirname(__FILE__), "..", "..", "config", "locales"))
-    I18n.load_path += Dir[File.join(path, "**", "*.{rb,yml}")]
-  end
+class WorkerPlugins::Engine < Rails::Engine # rubocop:disable Style/OneClassPerFile
+  isolate_namespace WorkerPlugins
+
+  # Add translations to load path.
+  path = File.realpath(File.join(File.dirname(__FILE__), "..", "..", "config", "locales"))
+  I18n.load_path += Dir[File.join(path, "**", "*.{rb,yml}")]
 end
