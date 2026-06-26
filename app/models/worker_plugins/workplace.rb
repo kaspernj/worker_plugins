@@ -14,8 +14,14 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
     links_query = workplace_links.order(:id)
     links_query = links_query.where(resource_type: types) if types
     links_query.find_in_batches do |workplace_links|
+      resources_by_type_and_id = load_resources_by_type_and_id(workplace_links)
+
       workplace_links.each do |workplace_link|
-        yield workplace_link.resource
+        resource = resources_by_type_and_id
+          .fetch(workplace_link.resource_type)[workplace_link.resource_id.to_s]
+        next unless resource
+
+        yield resource
         count += 1
         return if limit && count >= limit # rubocop:disable Lint/NonLocalExitFromIterator
       end
@@ -23,15 +29,19 @@ class WorkerPlugins::Workplace < WorkerPlugins::ApplicationRecord
   end
 
   def each_query_for_resources
-    workplace_links.group("worker_plugins_workplace_links.resource_type").order("worker_plugins_workplace_links.id").each do |workplace_link|
-      resource_type = workplace_link.resource_type
+    resource_ids_by_type = workplace_links
+      .order(:id)
+      .pluck(:resource_type, :resource_id)
+      .each_with_object({}) do |(resource_type, resource_id), grouped_ids|
+        grouped_ids[resource_type] ||= []
+        grouped_ids[resource_type] << resource_id
+      end
+
+    resource_ids_by_type.each do |resource_type, ids|
       constant = Object.const_get(resource_type)
-      ids = workplace_links.where(resource_type: workplace_link.resource_type).pluck(:resource_id)
 
       ids.each_slice(500) do |ids_slice|
-        query = constant.where(id: ids_slice)
-
-        yield(query:, resource_type:)
+        yield(query: constant.where(id: ids_slice), resource_type:)
       end
     end
   end
@@ -59,6 +69,19 @@ private
     end
 
     inserted_ids
+  end
+
+  def load_resources_by_type_and_id(workplace_links)
+    workplace_links
+      .group_by(&:resource_type)
+      .transform_values do |links_for_type|
+        resource_class = Object.const_get(links_for_type.first.resource_type)
+        resource_ids = links_for_type.map(&:resource_id)
+
+        resource_class
+          .where(id: resource_ids)
+          .index_by { |resource| resource.id.to_s }
+      end
   end
 
   def validate_owner

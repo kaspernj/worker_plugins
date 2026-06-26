@@ -1,17 +1,21 @@
 class WorkerPlugins::RemoveQuery < WorkerPlugins::ApplicationService
   arguments :query, :workplace
 
-  attr_reader :destroyed
-
   def perform
-    remove_query_from_workplace
-    succeed!(destroyed:, mode: :destroyed)
+    succeed!(affected_count: links_scope.delete_all)
   end
 
-  def remove_query_from_workplace
-    links_query = workplace.workplace_links.where(resource_type: model_class.name, resource_id: query_with_selected_ids)
-    @destroyed = links_query.pluck(:resource_id)
-    links_query.delete_all
+  def links_scope
+    scope = workplace.workplace_links.where(resource_type: model_class.name)
+    # When the caller's query applies no scoping, the `resource_id IN (SELECT
+    # ... FROM <target_table>)` subquery would materialize every row of the
+    # target model — the `resource_type = ?` filter alone is enough. Orphaned
+    # links (whose resource row has since been deleted) are deleted alongside
+    # live ones, which matches caller intent ("remove everything matching")
+    # and is the correct thing to do with dead references anyway.
+    return scope if relation_unscoped?(@query)
+
+    scope.where(resource_id: query_with_selected_ids)
   end
 
   def model_class

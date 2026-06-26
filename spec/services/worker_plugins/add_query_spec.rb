@@ -17,17 +17,41 @@ describe WorkerPlugins::AddQuery do
       expect { result }
         .to change(WorkerPlugins::WorkplaceLink, :count).by(2)
 
-      expect(result.fetch(:created)).to eq [task1.id, task2.id]
+      expect(result.fetch(:affected_count)).to eq 2
     end
 
     it "doesnt add the same resource multiple times" do
       task1 = create(:task, user:)
       task2 = create(:task, user:)
-      query = User.joins(:tasks).where(id: [task1.id, task2.id])
+      query = User.joins(:tasks).where(tasks: {id: [task1.id, task2.id]})
 
       expect(query).to eq [user, user]
       expect { WorkerPlugins::AddQuery.execute!(query:, workplace:) }
         .to change(workplace.workplace_links, :count).by(1)
+    end
+
+    it "reports only newly-added rows when some already exist" do
+      link1 # task1 is already linked to workplace
+      task2
+
+      result = WorkerPlugins::AddQuery.execute!(query: Task.all, workplace:)
+
+      expect(result.fetch(:affected_count)).to eq 1
+      expect(workplace.workplace_links.where(resource_type: "Task").count).to eq 2
+    end
+
+    it "filters already-linked rows before applying LIMIT so the window stays full" do
+      tasks = create_list(:task, 3)
+      # Link the first two; only the third is unlinked.
+      tasks[0..1].each { |task| create(:workplace_link, resource: task, workplace:) }
+
+      # limit(2) without pre-filtering would return the first two tasks, both
+      # already linked, and insert zero new rows. With pre-filtering it should
+      # skip them and insert the third.
+      result = WorkerPlugins::AddQuery.execute!(query: Task.limit(2), workplace:)
+
+      expect(result.fetch(:affected_count)).to eq 1
+      expect(workplace.workplace_links.where(resource: tasks[2]).count).to eq 1
     end
   end
 
@@ -45,7 +69,7 @@ describe WorkerPlugins::AddQuery do
     it "removes the order to fix crashes in postgres" do
       task1 = create(:task, user:)
       task2 = create(:task, user:)
-      query = User.joins(:tasks).where(id: [task1.id, task2.id]).order(:name)
+      query = User.joins(:tasks).where(tasks: {id: [task1.id, task2.id]}).order(:name)
       service = WorkerPlugins::AddQuery.new(query:, workplace:)
       sql = service.resources_to_add.to_sql
 

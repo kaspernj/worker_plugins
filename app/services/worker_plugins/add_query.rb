@@ -8,23 +8,17 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def perform
-    created # Cache which are about to be created
-    add_query_to_workplace
-    succeed!(created:)
+    succeed!(affected_count: add_query_to_workplace)
   end
 
   def add_query_to_workplace
-    WorkerPlugins::WorkplaceLink.connection.execute(sql)
-  end
-
-  def created
-    @created ||= resources_to_add.pluck(primary_key.to_sym)
+    WorkerPlugins::WorkplaceLink.connection.exec_update(sql, "WorkerPlugins::AddQuery INSERT", [])
   end
 
   def ids_added_already_query
     workplace
       .workplace_links
-      .where(resource_type: model_class.name, resource_id: query_with_selected_ids)
+      .where(resource_type: model_class.name)
   end
 
   def ids_added_already
@@ -40,22 +34,52 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
   end
 
   def primary_key
-    @primary_key ||= resources_to_add.klass.primary_key
-  end
-
-  def query_with_selected_ids
-    WorkerPlugins::SelectColumnWithTypeCast.execute!(
-      column_name_to_select: :id,
-      column_to_compare_with: WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id),
-      query:
-    )
+    @primary_key ||= model_class.primary_key
   end
 
   def resources_to_add
-    @resources_to_add ||= query
-      .distinct
-      .where
-      .not(id: ids_added_already)
+    # The unique index on `(workplace_id, resource_type, resource_id)` lets us
+    # skip the `WHERE NOT EXISTS` anti-join for the common unbounded query —
+    # duplicates are rejected on INSERT by the dialect-specific conflict
+    # clause in #sql. `.distinct` still handles same-row duplicates produced
+    # by joins in the caller's query (e.g. `User.joins(:tasks)`).
+    #
+    # When the caller scopes with `.limit` / `.offset`, we keep the anti-join
+    # so already-linked rows are filtered *before* the window is applied;
+    # otherwise `Task.limit(100)` could insert fewer than 100 new rows when
+    # some of those 100 are already linked.
+    @resources_to_add ||= if query.limit_value || query.offset_value
+      query.distinct.where("NOT EXISTS (#{existing_workplace_link_exists_sql})")
+    else
+      query.distinct
+    end
+  end
+
+  def existing_workplace_link_exists_sql
+    resource_id_column = "#{quote_table(WorkerPlugins::WorkplaceLink.table_name)}.#{quote_column(:resource_id)}"
+
+    workplace
+      .workplace_links
+      .where(resource_type: model_class.name)
+      .where("#{resource_id_column} = #{model_primary_key_cast_for_resource_id}")
+      .select(1)
+      .to_sql
+  end
+
+  def model_primary_key_cast_for_resource_id
+    primary_key_column = "#{quote_table(model_class.table_name)}.#{quote_column(model_class.primary_key)}"
+
+    # MySQL and SQLite do implicit conversion when comparing integer/uuid/string
+    # primary keys to the `resource_id` VARCHAR column. Postgres is strict about
+    # types and needs an explicit cast.
+    return primary_key_column unless postgres?
+
+    primary_key_type = model_class.column_for_attribute(model_class.primary_key).type
+    resource_id_type = WorkerPlugins::WorkplaceLink.column_for_attribute(:resource_id).type
+
+    return primary_key_column if primary_key_type == resource_id_type
+
+    "CAST(#{primary_key_column} AS VARCHAR)"
   end
 
   def select_sql
@@ -82,7 +106,7 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
 
   def sql
     @sql ||= "
-      INSERT INTO
+      #{insert_clause} INTO
         worker_plugins_workplace_links
 
       (
@@ -94,6 +118,23 @@ class WorkerPlugins::AddQuery < WorkerPlugins::ApplicationService
       )
 
       #{select_sql}
+      #{conflict_clause}
     "
+  end
+
+  def insert_clause
+    if mysql?
+      "INSERT IGNORE"
+    elsif sqlite?
+      "INSERT OR IGNORE"
+    else
+      "INSERT"
+    end
+  end
+
+  def conflict_clause
+    return "" unless postgres?
+
+    "ON CONFLICT (workplace_id, resource_type, resource_id) DO NOTHING"
   end
 end
