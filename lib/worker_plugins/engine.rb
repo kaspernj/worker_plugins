@@ -1,4 +1,4 @@
-module WorkerPlugins; end
+require "worker_plugins/namespace"
 
 class WorkerPlugins::Engine < Rails::Engine
   isolate_namespace WorkerPlugins
