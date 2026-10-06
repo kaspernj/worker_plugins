@@ -4,8 +4,8 @@ class WorkerPlugins::UserRelationshipPolymorphic
   rescue StandardError => e
     # Fall back to true if the table doesn't exist yet (MySQL, SQLite, PostgreSQL)
     return true if e.message.start_with?("Could not find table") ||
-                   e.message.match?(/Table '(.+)' doesn't exist/) ||
-                   e.message.match?(/relation .* does not exist/)
+      e.message.match?(/Table '(.+)' doesn't exist/) ||
+      e.message.match?(/relation .* does not exist/)
 
     raise e
   end
