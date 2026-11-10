@@ -134,7 +134,7 @@ builds:
           - .github/**
           - tensorbuzz.yml
         script:
-          - bundle exec rubocop --enable-pending-cops
+          - bundle exec rubocop
 services:
   mariadb:
     environment:
