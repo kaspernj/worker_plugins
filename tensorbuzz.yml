@@ -18,18 +18,20 @@ builds:
       sqlite_rspec:
         name: RSpec SQLite
         paths:
-          - app/**
+          - app/models/**
+          - app/services/**
           - config/**
           - db/**
           - lib/**
-          - spec/**
+          - spec/models/**
+          - spec/services/**
+          - spec/factories/**
+          - spec/support/**
           - Gemfile
           - Gemfile.lock
           - Rakefile
           - worker_plugins.gemspec
           - .rspec
-          - .rubocop.yml
-          - .rubocop_todo.yml
           - peak_flow.yml
           - "*.yml"
           - "*.yaml"
@@ -46,18 +48,21 @@ builds:
       postgres_rspec:
         name: RSpec Postgres
         paths:
-          - app/**
+          - app/models/**
+          - app/services/**
           - config/**
           - db/**
           - lib/**
-          - spec/**
+          - spec/models/**
+          - spec/services/**
+          - spec/factories/**
+          - spec/support/**
+          - spec/dummy/db/**
           - Gemfile
           - Gemfile.lock
           - Rakefile
           - worker_plugins.gemspec
           - .rspec
-          - .rubocop.yml
-          - .rubocop_todo.yml
           - peak_flow.yml
           - "*.yml"
           - "*.yaml"
@@ -80,18 +85,21 @@ builds:
       mysql_rspec:
         name: RSpec MySQL
         paths:
-          - app/**
+          - app/models/**
+          - app/services/**
           - config/**
           - db/**
           - lib/**
-          - spec/**
+          - spec/models/**
+          - spec/services/**
+          - spec/factories/**
+          - spec/support/**
+          - spec/dummy/config/database.yml
           - Gemfile
           - Gemfile.lock
           - Rakefile
           - worker_plugins.gemspec
           - .rspec
-          - .rubocop.yml
-          - .rubocop_todo.yml
           - peak_flow.yml
           - "*.yml"
           - "*.yaml"
