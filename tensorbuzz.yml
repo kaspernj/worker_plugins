@@ -27,6 +27,9 @@ builds:
           - spec/services/**
           - spec/factories/**
           - spec/support/**
+          - spec/dummy/**
+          - spec/rails_helper.rb
+          - spec/spec_helper.rb
           - Gemfile
           - Gemfile.lock
           - Rakefile
@@ -58,6 +61,9 @@ builds:
           - spec/factories/**
           - spec/support/**
           - spec/dummy/db/**
+          - spec/dummy/**
+          - spec/rails_helper.rb
+          - spec/spec_helper.rb
           - Gemfile
           - Gemfile.lock
           - Rakefile
@@ -95,6 +101,9 @@ builds:
           - spec/factories/**
           - spec/support/**
           - spec/dummy/config/database.yml
+          - spec/dummy/**
+          - spec/rails_helper.rb
+          - spec/spec_helper.rb
           - Gemfile
           - Gemfile.lock
           - Rakefile
